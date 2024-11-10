@@ -1,16 +1,12 @@
-package auth
+package models
 
 import (
-	_ "GoMJTrainingCamp/dbs"
-	_ "GoMJTrainingCamp/dbs/model/users"
-	models "GoMJTrainingCamp/dbs/model/users"
 	"GoMJTrainingCamp/utils"
 	"context"
+	"encoding/json"
 	"fmt"
-
 	"log"
 	"net/http"
-
 	"strconv"
 	"strings"
 	"time"
@@ -86,8 +82,7 @@ func WithJWTAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
 		log.Printf("Converted userID to int: %d", userID)
 
 		// Step 8: Look up the user in the database
-
-		user, err := models.GetUserByID(uint(userID)) // Use your existing GetUserByID function
+		user, err := GetUserByID(uint(userID)) // Pass db along with userID
 		if err != nil {
 			log.Printf("Failed to get user by id: %v", err)
 			permissionDenied(w)
@@ -144,16 +139,15 @@ func validateJWT(tokenString string) (*jwt.Token, error) {
 // permissionDenied handles permission errors by sending a 403 response
 func permissionDenied(w http.ResponseWriter) {
 	log.Println("Permission denied")
-	utils.WriteError(w, http.StatusForbidden, fmt.Errorf("permission denied"))
-}
-
-// GetUserIDFromContext retrieves the users ID from the context if it exists
-func GetUserIDFromContext(ctx context.Context) int {
-	userID, ok := ctx.Value(UserKey).(int)
-	if !ok {
-		log.Println("User ID not found in context")
-		return -1
+	// Send a consistent error response using the generic APIResponse format
+	response := utils.APIResponse{
+		Status:  http.StatusForbidden,
+		Message: "Permission denied",
+		Data:    nil, // No data in error responses
 	}
 
-	return userID
+	// Write the response in JSON format
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusForbidden)
+	json.NewEncoder(w).Encode(response)
 }

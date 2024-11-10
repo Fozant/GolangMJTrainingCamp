@@ -1,7 +1,9 @@
 package main
 
 import (
-	"GoMJTrainingCamp/dbs"
+	"GoMJTrainingCamp/dbs/dbConnection"
+	models "GoMJTrainingCamp/dbs/models/users"
+	"GoMJTrainingCamp/service"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -17,14 +19,18 @@ func main() {
 
 	// Attempt to connect to the database and display status
 	startTime := time.Now()
-	if err := dbs.ConnectDatabase(); err != nil {
+	if err := dbConnection.ConnectDatabase(); err != nil {
 		log.Fatalf("❌ Database Connection Failed: %v", err)
 	} else {
 		fmt.Println("✅ Database Connection Successful!")
 	}
-
+	if err := dbConnection.DB.AutoMigrate(&models.User{}); err != nil {
+		fmt.Printf("failed to migrate database: %v\n", err)
+		return // Exiting the function after logging the error
+	}
 	// Set up routes
-	//r.GET("/api/products", productcontroller.Index)
+	r.GET("/api/login", service.HandleLogin)
+	r.POST("/api/register", service.HandleRegister)
 
 	// Run the server and display server details like Spring Boot
 	port := ":8080"
