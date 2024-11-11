@@ -3,7 +3,7 @@ package main
 import (
 	"GoMJTrainingCamp/dbs/dbConnection"
 	models "GoMJTrainingCamp/dbs/models/users"
-	"GoMJTrainingCamp/service"
+	"GoMJTrainingCamp/routes"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -28,11 +28,11 @@ func main() {
 		fmt.Printf("failed to migrate database: %v\n", err)
 		return // Exiting the function after logging the error
 	}
-	// Set up routes
-	r.GET("/api/login", service.HandleLogin)
-	r.POST("/api/register", service.HandleRegister)
 
-	// Run the server and display server details like Spring Boot
+	// Set up routes via the routes package
+	routes.SetupRoutes(r)
+
+	// Run the server and display server details
 	port := ":8080"
 	fmt.Printf("🚀 Starting application on http://localhost%s\n", port)
 	fmt.Printf("Application started in %v seconds\n", time.Since(startTime).Seconds())
@@ -40,6 +40,7 @@ func main() {
 		log.Fatalf("❌ Server failed to start: %v", err)
 	}
 }
+
 func displayBanner() {
 	fmt.Println("===========================================")
 	fmt.Println("     MY GO APP - REST API WITH GIN & GORM  ")

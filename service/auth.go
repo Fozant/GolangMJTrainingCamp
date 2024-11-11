@@ -1,6 +1,7 @@
-package models
+package service
 
 import (
+	"GoMJTrainingCamp/dbs/models/users"
 	"GoMJTrainingCamp/utils"
 	"context"
 	"encoding/json"
@@ -82,7 +83,7 @@ func WithJWTAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
 		log.Printf("Converted userID to int: %d", userID)
 
 		// Step 8: Look up the user in the database
-		user, err := GetUserByID(uint(userID)) // Pass db along with userID
+		user, err := models.GetUserByID(uint(userID)) // Pass db along with userID
 		if err != nil {
 			log.Printf("Failed to get user by id: %v", err)
 			permissionDenied(w)

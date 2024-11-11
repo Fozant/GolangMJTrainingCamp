@@ -1,118 +1,19 @@
 package service
 
 import (
-	models2 "GoMJTrainingCamp/dbs/dbConnection"
-	//"GoMJTrainingCamp/dbs/models/trainer"
-	"GoMJTrainingCamp/dbs/models/users"
-	"GoMJTrainingCamp/utils"
-	"context"
+	"GoMJTrainingCamp/dbs/dbConnection"
+	models "GoMJTrainingCamp/dbs/models/users"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-	"log"
-	"net/http"
 )
 
-type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-type RegisterRequest struct {
-	PNumber  string      `json:"p_number"`
-	Name     string      `json:"name"`
-	Email    string      `json:"email"`
-	Password string      `json:"password" `
-	Role     models.Role `json:"role" `
-	//IDTrainer *trainer.Trainer `json:"id_trainer,omitempty" gorm:"foreignKey:IDTrainer"`
-}
-
-func HandleLogin(c *gin.Context) {
-	var loginRequest LoginRequest
-	if err := c.ShouldBindJSON(&loginRequest); err != nil {
-		utils.SendErrorResponse(c, http.StatusBadRequest, "Invalid request payload")
-		return
-	}
-
-	// Validate credentials directly with GetUserByID in dbs package.
-	user, err := ValidateUserCredentials(loginRequest.Email, loginRequest.Password)
-	if err != nil {
-		utils.SendErrorResponse(c, http.StatusUnauthorized, "Invalid email or password")
-		return
-	}
-
-	// Generate JWT token
-	token, err := models.CreateJWT([]byte("my-secret-key"), int(user.IDUser))
-	if err != nil {
-		log.Printf("Error generating JWT token: %v", err)
-		utils.SendErrorResponse(c, http.StatusInternalServerError, "Internal server error")
-		return
-	}
-
-	// Send JWT response
-	utils.SendSuccessResponse(c, "Login successful", gin.H{"token": token})
-}
-
-func HandleRegister(c *gin.Context) {
-	var request RegisterRequest
-
-	// Parse the incoming JSON request into the RegisterRequest struct
-	if err := c.ShouldBindJSON(&request); err != nil {
-		utils.SendErrorResponse(c, http.StatusBadRequest, "Invalid request payload")
-		return
-	}
-
-	// Create a new validator instance
-	validate := validator.New()
-
-	// Validate the request struct using the validator
-	if err := validate.Struct(request); err != nil {
-		// If validation fails, return a detailed error message
-		errors := err.(validator.ValidationErrors)
-		utils.SendErrorResponse(c, http.StatusBadRequest, fmt.Sprintf("Invalid payload: %v", errors))
-		return
-	}
-
-	// Check if the email already exists in the database
-	_, err := models.GetUserByEmail(request.Email)
-	if err == nil {
-		utils.SendErrorResponse(c, http.StatusBadRequest, fmt.Sprintf("User with email %s already exists", request.Email))
-		return
-	}
-
-	// Hash the user's password
-	hashedPassword, err := models.HashPassword(request.Password)
-	if err != nil {
-		utils.SendErrorResponse(c, http.StatusInternalServerError, "Error hashing password")
-		return
-	}
-
-	// Create the new user object
-	user := models.User{
-		PNumber:  request.PNumber,
-		Name:     request.Name,
-		Email:    request.Email,
-		Password: hashedPassword,
-		Role:     request.Role,
-		//IDTrainer: request.IDTrainer,
-	}
-
-	// Create the user in the database
-	err = models.CreateUser(user)
-	if err != nil {
-		utils.SendErrorResponse(c, http.StatusInternalServerError, "Error creating user")
-		return
-	}
-
-	// Respond with success
-	utils.SendSuccessResponse(c, "User registered successfully", nil)
-}
-
+// ValidateUserCredentials validates user credentials (email and password)
 func ValidateUserCredentials(email, password string) (*models.User, error) {
 	var user models.User
+
 	// Query the user by email
-	if err := models2.DB.Where("email = ?", email).First(&user).Error; err != nil {
+	if err := dbConnection.DB.Where("email = ?", email).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("user not found")
 		}
@@ -124,17 +25,40 @@ func ValidateUserCredentials(email, password string) (*models.User, error) {
 		return nil, fmt.Errorf("invalid password: %w", err)
 	}
 
-	// If user is found and password is correct, return the user object
 	return &user, nil
 }
 
-// GetUserIDFromContext retrieves the users ID from the context if it exists
-func GetUserIDFromContext(ctx context.Context) int {
-	userID, ok := ctx.Value(models.UserKey).(int)
-	if !ok {
-		log.Println("User ID not found in context")
-		return -1
+// GetUserByEmail retrieves a user by email
+func GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
+
+	// Query the user by email
+	if err := dbConnection.DB.Where("email = ?", email).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("user with email %s not found", email)
+		}
+		return nil, fmt.Errorf("error querying user: %w", err)
 	}
 
-	return userID
+	return &user, nil
+}
+
+// HashPassword hashes the user's password before saving it to the database
+func HashPassword(password string) (string, error) {
+	// Hash the password using bcrypt
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", fmt.Errorf("error hashing password: %w", err)
+	}
+
+	return string(hashedPassword), nil
+}
+
+// CreateUser creates a new user in the database
+func CreateUser(user models.User) error {
+	// Create the user in the database
+	if err := dbConnection.DB.Create(&user).Error; err != nil {
+		return fmt.Errorf("error creating user: %w", err)
+	}
+	return nil
 }
