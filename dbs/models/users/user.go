@@ -25,7 +25,6 @@ func (user *User) BeforeCreate(tx *gorm.DB) (err error) {
 	return nil
 }
 
-// isValidRole checks if the role is valid
 func (user *User) isValidRole() bool {
 	switch user.Role {
 	case RoleUser, RoleAdmin, RoleTrainer:
@@ -65,14 +64,13 @@ func GetUserByEmail(email string) (*User, error) {
 	var user User
 	// Query the database to find the user by email
 	if err := dbConnection.DB.Where("email = ?", email).First(&user).Error; err != nil {
-		// Return nil and error if no user is found or an error occurs
 		return nil, err
 	}
 	return &user, nil
 }
 
 func CreateUser(user User) error {
-	// Insert the new user into the database
+
 	if err := dbConnection.DB.Create(&user).Error; err != nil {
 		log.Printf("Error creating user: %v", err)
 		return err

@@ -76,7 +76,7 @@ func HandleRegister(c *gin.Context) {
 		Name:             request.Name,
 		Email:            request.Email,
 		Password:         hashedPassword,
-		Role:             request.Role,
+		Role:             models.RoleUser,
 		RegistrationDate: time.Now(),
 	}
 

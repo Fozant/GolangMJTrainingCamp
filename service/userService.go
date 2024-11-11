@@ -43,17 +43,6 @@ func GetUserByEmail(email string) (*models.User, error) {
 	return &user, nil
 }
 
-// HashPassword hashes the user's password before saving it to the database
-func HashPassword(password string) (string, error) {
-	// Hash the password using bcrypt
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", fmt.Errorf("error hashing password: %w", err)
-	}
-
-	return string(hashedPassword), nil
-}
-
 // CreateUser creates a new user in the database
 func CreateUser(user models.User) error {
 	// Create the user in the database
