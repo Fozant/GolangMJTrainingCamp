@@ -2,7 +2,8 @@ package main
 
 import (
 	"GoMJTrainingCamp/dbs/dbConnection"
-	models "GoMJTrainingCamp/dbs/models/users"
+	models "GoMJTrainingCamp/dbs/models"
+	model "GoMJTrainingCamp/dbs/models/users"
 	"GoMJTrainingCamp/routes"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -24,7 +25,8 @@ func main() {
 	} else {
 		fmt.Println("✅ Database Connection Successful!")
 	}
-	if err := dbConnection.DB.AutoMigrate(&models.User{}); err != nil {
+
+	if err := dbConnection.DB.AutoMigrate(&model.User{}, &models.TrainingClass{}); err != nil {
 		fmt.Printf("failed to migrate database: %v\n", err)
 		return // Exiting the function after logging the error
 	}
