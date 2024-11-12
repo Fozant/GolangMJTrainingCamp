@@ -3,6 +3,7 @@ package authController
 import (
 	"GoMJTrainingCamp/dbs/models"
 	"GoMJTrainingCamp/service"
+	"GoMJTrainingCamp/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -16,7 +17,6 @@ type CreateClassRequest struct {
 }
 
 func CreateClass(c *gin.Context) {
-
 	var request CreateClassRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -32,5 +32,5 @@ func CreateClass(c *gin.Context) {
 	if err := service.CreateTrainingClass(&class); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create class"})
 	}
-	c.JSON(http.StatusOK, gin.H{"product": class})
+	utils.SendSuccessResponse(c, "add Product Succesfull", class)
 }
