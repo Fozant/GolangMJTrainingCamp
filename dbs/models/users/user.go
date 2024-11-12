@@ -51,7 +51,7 @@ func (u *User) GetAuthorities() []string {
 
 func GetUserByID(userID uint) (*User, error) {
 	var user User
-	query := "SELECT * FROM users WHERE id = ?"
+	query := "SELECT * FROM users WHERE id_user = ?"
 
 	result := dbConnection.DB.Raw(query, userID).Scan(&user)
 	if result.Error != nil {

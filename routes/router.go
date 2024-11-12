@@ -3,6 +3,7 @@ package routes
 import (
 	authController "GoMJTrainingCamp/controller"
 	trainingClassController "GoMJTrainingCamp/controller"
+	"GoMJTrainingCamp/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,6 +21,7 @@ func authRoutes(r *gin.Engine) {
 func classRoutes(r *gin.Engine) {
 
 	classGroup := r.Group("/api/class")
+	classGroup.Use(service.WithJWTAuth)
 	classGroup.POST("/add", trainingClassController.CreateClass)
 
 }
