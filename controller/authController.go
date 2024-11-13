@@ -18,15 +18,12 @@ func HandleLogin(c *gin.Context) {
 		utils.SendErrorResponse(c, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
-
 	// Validate credentials directly with GetUserByID in dbs package.
 	user, err := service.ValidateUserCredentials(loginRequest.Email, loginRequest.Password)
 	if err != nil {
 		utils.SendErrorResponse(c, http.StatusUnauthorized, "Invalid email or password")
 		return
 	}
-
-	// Generate JWT token
 	token, err := service.CreateJWT([]byte("my-secret-key"), int(user.IDUser))
 	if err != nil {
 		log.Printf("Error generating JWT token: %v", err)

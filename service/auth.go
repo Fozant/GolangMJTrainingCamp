@@ -34,22 +34,14 @@ func WithJWTAuth(c *gin.Context) {
 		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 		log.Printf("Token after removing 'Bearer' prefix: %s", tokenString)
 	}
-
 	// Step 3: Validate the token
 	token, err := ValidateJWT(tokenString)
 	if err != nil {
 		log.Printf("Failed to validate token: %v", err)
-		permissionDenied(c)
+		tokenExpired(c)
 		return
 	}
 	log.Println("Token validated successfully")
-
-	// Step 4: Check if token is valid
-	if !token.Valid {
-		log.Println("Token is not valid")
-		permissionDenied(c)
-		return
-	}
 
 	// Step 5: Extract claims from token
 	claims, ok := token.Claims.(jwt.MapClaims)
@@ -97,12 +89,12 @@ func WithJWTAuth(c *gin.Context) {
 
 // CreateJWT generates a JWT token with a specified expiration and userID claim
 func CreateJWT(secret []byte, userID int) (string, error) {
-	expiration := time.Second * time.Duration(3600*24*7)
+	expiration := time.Second * time.Duration(3600)
 	log.Printf("Creating JWT with expiration: %d seconds", 3600*24*7)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userID":    strconv.Itoa(userID),
-		"expiresAt": time.Now().Add(expiration).Unix(),
+		"userID": strconv.Itoa(userID),
+		"exp":    time.Now().Add(expiration).Unix(),
 	})
 
 	tokenString, err := token.SignedString(secret)
@@ -138,6 +130,21 @@ func ValidateJWT(tokenString string) (*jwt.Token, error) {
 
 	return token, err
 }
+
+func tokenExpired(c *gin.Context) {
+	log.Println("Permission denied")
+
+	// Create the API response struct
+	response := utils.APIResponse{
+		Status:  http.StatusForbidden,
+		Message: "token Expired",
+		Data:    nil,
+	}
+
+	// Set the response content type and send the JSON response
+	c.Header("Content-Type", "application/json")
+	c.AbortWithStatusJSON(http.StatusForbidden, response)
+}
 func permissionDenied(c *gin.Context) {
 	log.Println("Permission denied")
 
@@ -150,5 +157,5 @@ func permissionDenied(c *gin.Context) {
 
 	// Set the response content type and send the JSON response
 	c.Header("Content-Type", "application/json")
-	c.JSON(http.StatusForbidden, response)
+	c.AbortWithStatusJSON(http.StatusForbidden, response)
 }
