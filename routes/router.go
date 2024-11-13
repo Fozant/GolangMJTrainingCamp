@@ -23,5 +23,6 @@ func classRoutes(r *gin.Engine) {
 	classGroup := r.Group("/api/class")
 	classGroup.Use(service.WithJWTAuth)
 	classGroup.POST("/add", trainingClassController.CreateClass)
+	classGroup.GET("/get", trainingClassController.GetClasses)
 
 }

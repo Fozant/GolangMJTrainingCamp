@@ -137,7 +137,7 @@ func tokenExpired(c *gin.Context) {
 	// Create the API response struct
 	response := utils.APIResponse{
 		Status:  http.StatusForbidden,
-		Message: "token Expired",
+		Message: "token Expired or invalid",
 		Data:    nil,
 	}
 

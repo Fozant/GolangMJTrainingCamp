@@ -3,6 +3,7 @@ package authController
 import (
 	"GoMJTrainingCamp/dbs/models"
 	"GoMJTrainingCamp/service"
+
 	"GoMJTrainingCamp/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -34,3 +35,49 @@ func CreateClass(c *gin.Context) {
 	}
 	utils.SendSuccessResponse(c, "add Product Succesfull", class)
 }
+
+func GetClasses(c *gin.Context) {
+	id := c.DefaultQuery("id", "")
+	date := c.DefaultQuery("date", "")
+	classes, err := service.GetClasses(id, date)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  http.StatusInternalServerError,
+			"message": err.Error(),
+		})
+		return
+	}
+	utils.SendSuccessResponse(c, "Classes found", classes)
+
+}
+
+//func GetClasses(c *gin.Context) {
+//	id := c.Query("id")
+//	date := c.Query("date")
+//
+//	var classes []models.TrainingClass
+//
+//	// Check if 'id' parameter is provided
+//	if id != "" {
+//		err := dbConnection.DB.Where("id = ?", id).Find(&classes).Error
+//		if err != nil {
+//			utils.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+//			return
+//		}
+//	} else if date != "" {
+//		// Check if 'date' parameter is provided
+//		err := dbConnection.DB.Where("Date = ?", date).Find(&classes).Error
+//		if err != nil {
+//			utils.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+//			return
+//		}
+//	} else {
+//		// No parameter, get all classes
+//		err := dbConnection.DB.Find(&classes).Error
+//		if err != nil {
+//			utils.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+//			return
+//		}
+//	}
+//	utils.SendSuccessResponse(c, "Classes found", classes)
+//}
