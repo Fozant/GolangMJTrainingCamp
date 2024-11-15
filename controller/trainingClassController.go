@@ -3,7 +3,6 @@ package authController
 import (
 	"GoMJTrainingCamp/dbs/models"
 	"GoMJTrainingCamp/service"
-
 	"GoMJTrainingCamp/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -43,7 +42,7 @@ func GetClasses(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  http.StatusInternalServerError,
-			"message": err.Error(),
+			"message": err,
 		})
 		return
 	}
