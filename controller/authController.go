@@ -30,7 +30,11 @@ func HandleLogin(c *gin.Context) {
 		utils.SendErrorResponse(c, http.StatusInternalServerError, "Internal server error")
 		return
 	}
-	utils.SendSuccessResponse(c, "Login successful", gin.H{"token": token})
+	utils.SendSuccessResponse(c, "Login successful", gin.H{
+		"token":     token,
+		"user role": user.Role,
+		"user_name": user.Name,
+	})
 }
 
 func HandleRegister(c *gin.Context) {
@@ -109,7 +113,7 @@ func HandleRegisterTrainer(id uint, addTrainer AddTrainerRequest, c *gin.Context
 		IDTrainer:        id,
 	}
 	if err := service.CreateUser(user); err != nil {
-		utils.SendErrorResponse(c, http.StatusInternalServerError, "Error creating user")
+		utils.SendErrorResponse(c, http.StatusInternalServerError, "Error creating trainer")
 		return
 	}
 	// Generate JWT token
@@ -119,5 +123,9 @@ func HandleRegisterTrainer(id uint, addTrainer AddTrainerRequest, c *gin.Context
 		utils.SendErrorResponse(c, http.StatusInternalServerError, "Internal server error")
 		return
 	}
-	utils.SendSuccessResponse(c, "User registered successfully", token)
+	utils.SendSuccessResponse(c, "Trainer registered successfully",
+		gin.H{
+			"token": token,
+			"user":  user.IDUser,
+		})
 }
