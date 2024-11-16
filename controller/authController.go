@@ -116,7 +116,6 @@ func HandleRegisterTrainer(id uint, addTrainer AddTrainerRequest, c *gin.Context
 		utils.SendErrorResponse(c, http.StatusInternalServerError, "Error creating trainer")
 		return
 	}
-	// Generate JWT token
 	token, err := service.CreateJWT([]byte("my-secret-key"), int(user.IDUser))
 	if err != nil {
 		log.Printf("Error generating JWT token: %v", err)
@@ -126,6 +125,5 @@ func HandleRegisterTrainer(id uint, addTrainer AddTrainerRequest, c *gin.Context
 	utils.SendSuccessResponse(c, "Trainer registered successfully",
 		gin.H{
 			"token": token,
-			"user":  user.IDUser,
 		})
 }
