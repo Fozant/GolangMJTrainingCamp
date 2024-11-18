@@ -1,4 +1,4 @@
-package authController
+package controller
 
 import (
 	"GoMJTrainingCamp/dbs/models"
@@ -16,7 +16,15 @@ type CreateClassRequest struct {
 	ClassCapacity    int64     `json:"classCapacity" binding:"required"`
 }
 
-func CreateClass(c *gin.Context) {
+type ClassHandler struct {
+	ClassService service.ClassServiceInterface
+}
+
+func NewClassHandler(classService service.ClassServiceInterface) *ClassHandler {
+	return &ClassHandler{ClassService: classService}
+}
+
+func (h *ClassHandler) CreateClass(c *gin.Context) {
 	var request CreateClassRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -29,16 +37,16 @@ func CreateClass(c *gin.Context) {
 		ClassDateTime:    request.ClassDateTime,
 		ClassCapacity:    request.ClassCapacity,
 	}
-	if err := service.CreateTrainingClass(&class); err != nil {
+	if err := h.ClassService.CreateTrainingClass(&class); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create class"})
 	}
 	utils.SendSuccessResponse(c, "add Product Succesfull", class)
 }
 
-func GetClasses(c *gin.Context) {
+func (h *ClassHandler) GetClasses(c *gin.Context) {
 	id := c.DefaultQuery("id", "")
 	date := c.DefaultQuery("date", "")
-	classes, err := service.GetClasses(id, date)
+	classes, err := h.ClassService.GetClasses(id, date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  http.StatusInternalServerError,

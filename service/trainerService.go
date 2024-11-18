@@ -7,7 +7,17 @@ import (
 	"log"
 )
 
-func AddTrainer(trainer *trainer2.Trainer) (idTrainer uint, err error) {
+type TrainerServiceInterface interface {
+	AddTrainer(trainer *trainer2.Trainer) (idTrainer uint, err error)
+}
+type TrainerService struct {
+}
+
+func NewTrainerService() TrainerServiceInterface {
+	return &TrainerService{}
+}
+
+func (s *TrainerService) AddTrainer(trainer *trainer2.Trainer) (idTrainer uint, err error) {
 	if result := dbConnection.DB.Create(&trainer); result.Error != nil {
 		log.Printf("Error creating class: %v", result.Error)
 		return 0, errors.New("database error")

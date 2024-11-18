@@ -1,4 +1,4 @@
-package authController
+package controller
 
 import (
 	models "GoMJTrainingCamp/dbs/models/users"

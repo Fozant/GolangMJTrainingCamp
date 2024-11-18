@@ -1,4 +1,4 @@
-package authController
+package controller
 
 import (
 	trainer2 "GoMJTrainingCamp/dbs/models/trainer"
@@ -17,7 +17,14 @@ type AddTrainerRequest struct {
 	PNumber            string `json:"pNumber"`
 }
 
-func AddTrainer(c *gin.Context) {
+type TrainerHandler struct {
+	TrainerService service.TrainerServiceInterface
+}
+
+func NewTrainerHandler(trainerService service.TrainerServiceInterface) *TrainerHandler {
+	return &TrainerHandler{TrainerService: trainerService}
+}
+func (h *TrainerHandler) AddTrainer(c *gin.Context) {
 	var addTrainer AddTrainerRequest
 	if err := c.ShouldBindJSON(&addTrainer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -27,7 +34,7 @@ func AddTrainer(c *gin.Context) {
 		TrainerName:        addTrainer.TrainerName,
 		TrainerDescription: addTrainer.TrainerDescription,
 	}
-	idTrainer, err := service.AddTrainer(&trainer)
+	idTrainer, err := h.TrainerService.AddTrainer(&trainer)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create class"})
 		return
@@ -54,7 +61,7 @@ func AddTrainer(c *gin.Context) {
 //		return
 //	}
 //
-//	// Teruskan data request yang sudah dibaca
+//   Teruskan data request yang sudah dibaca
 //	HandleRegisterTrainer(idTrainer, addTrainer, c)
 //
 //	utils.SendSuccessResponse(c, "add trainer successful", trainer)

@@ -1,11 +1,14 @@
 package main
 
 import (
+	trainerController "GoMJTrainingCamp/controller"
+	trainingClassController "GoMJTrainingCamp/controller"
 	"GoMJTrainingCamp/dbs/dbConnection"
 	"GoMJTrainingCamp/dbs/models"
 	trainer "GoMJTrainingCamp/dbs/models/trainer"
 	users "GoMJTrainingCamp/dbs/models/users"
 	"GoMJTrainingCamp/routes"
+	"GoMJTrainingCamp/service"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -15,9 +18,6 @@ import (
 func main() {
 	// Display a custom banner at startup
 	displayBanner()
-
-	// Initialize Gin router
-	r := gin.Default()
 
 	// Attempt to connect to the database and display status
 	startTime := time.Now()
@@ -29,14 +29,15 @@ func main() {
 
 	if err := dbConnection.DB.AutoMigrate(&users.User{}, &models.TrainingClass{}, trainer.Trainer{}); err != nil {
 		fmt.Printf("failed to migrate database: %v\n", err)
-		return // Exiting the function after logging the error
+		return
 	}
-
-	// Set up routes via the routes package
-	routes.SetupRoutes(r)
+	classHandler, trainerHandler := initHandler()
+	r := gin.Default()
+	routes.SetupRoutes(r, classHandler, trainerHandler)
 
 	// Run the server and display server details
 	port := ":8080"
+
 	fmt.Printf("🚀 Starting application on http://localhost%s\n", port)
 	fmt.Printf("Application started in %v seconds\n", time.Since(startTime).Seconds())
 	if err := r.Run(port); err != nil {
@@ -52,4 +53,17 @@ func displayBanner() {
 	fmt.Println("===========================================")
 	fmt.Println("Starting Application...")
 	fmt.Println()
+}
+func initHandler() (
+	*trainingClassController.ClassHandler,
+	*trainerController.TrainerHandler,
+) {
+
+	classService := service.NewClassService()
+	trainerService := service.NewTrainerService()
+
+	classHandler := trainingClassController.NewClassHandler(classService)
+	trainerHandler := trainerController.NewTrainerHandler(trainerService)
+
+	return classHandler, trainerHandler
 }

@@ -7,7 +7,17 @@ import (
 	"log"
 )
 
-func CreateTrainingClass(class *models.TrainingClass) error {
+type ClassServiceInterface interface {
+	CreateTrainingClass(class *models.TrainingClass) error
+	GetClasses(id, date string) ([]models.TrainingClass, error)
+}
+type ClassService struct{}
+
+func NewClassService() ClassServiceInterface {
+	return &ClassService{}
+}
+
+func (s *ClassService) CreateTrainingClass(class *models.TrainingClass) error {
 	if result := dbConnection.DB.Create(&class); result.Error != nil {
 		log.Printf("Error creating class: %v", result.Error)
 		return errors.New("database error")
@@ -15,7 +25,7 @@ func CreateTrainingClass(class *models.TrainingClass) error {
 	return nil
 }
 
-func GetClasses(id, date string) ([]models.TrainingClass, error) {
+func (s *ClassService) GetClasses(id, date string) ([]models.TrainingClass, error) {
 	var classes []models.TrainingClass
 
 	if id != "" {
