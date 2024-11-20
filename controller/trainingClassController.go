@@ -40,7 +40,7 @@ func (h *ClassHandler) CreateClass(c *gin.Context) {
 	if err := h.ClassService.CreateTrainingClass(&class); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create class"})
 	}
-	utils.SendSuccessResponse(c, "add Product Succesfull", class)
+	utils.SendSuccessResponse(c, "add classes Succesfull", class)
 }
 
 func (h *ClassHandler) GetClasses(c *gin.Context) {

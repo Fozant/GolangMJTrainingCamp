@@ -5,7 +5,7 @@ import (
 )
 
 type TrainingClass struct {
-	ID               uint      `gorm:"primaryKey;autoIncrement" json:"id"`
+	IDTrainingClass  uint      `gorm:"primaryKey;autoIncrement" json:"id_trainingClass"`
 	ClassName        string    `gorm:"type:varchar(255);not null" json:"className"`
 	ClassRequirement string    `gorm:"type:text" json:"classRequirement,omitempty"`
 	ClassNote        string    `gorm:"type:text" json:"classNote,omitempty"`

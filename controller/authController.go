@@ -31,9 +31,10 @@ func HandleLogin(c *gin.Context) {
 		return
 	}
 	utils.SendSuccessResponse(c, "Login successful", gin.H{
-		"token":     token,
-		"user role": user.Role,
+		"user_id":   user.IDUser,
+		"user_role": user.Role,
 		"user_name": user.Name,
+		"token":     token,
 	})
 }
 
@@ -69,6 +70,7 @@ func HandleRegister(c *gin.Context) {
 		Password:         hashedPassword,
 		Role:             models.RoleUser,
 		RegistrationDate: time.Now(),
+		IDTrainer:        nil,
 	}
 	if err := service.CreateUser(user); err != nil {
 		utils.SendErrorResponse(c, http.StatusInternalServerError, "Error creating user")
@@ -110,7 +112,7 @@ func HandleRegisterTrainer(id uint, addTrainer AddTrainerRequest, c *gin.Context
 		Password:         hashedPassword,
 		Role:             models.RoleTrainer,
 		RegistrationDate: time.Now(),
-		IDTrainer:        id,
+		IDTrainer:        nil,
 	}
 	if err := service.CreateUser(user); err != nil {
 		utils.SendErrorResponse(c, http.StatusInternalServerError, "Error creating trainer")

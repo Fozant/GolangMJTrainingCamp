@@ -1,6 +1,7 @@
 package main
 
 import (
+	membershipController "GoMJTrainingCamp/controller"
 	trainerController "GoMJTrainingCamp/controller"
 	trainingClassController "GoMJTrainingCamp/controller"
 	"GoMJTrainingCamp/dbs/dbConnection"
@@ -27,13 +28,13 @@ func main() {
 		fmt.Println("✅ Database Connection Successful!")
 	}
 
-	if err := dbConnection.DB.AutoMigrate(&users.User{}, &models.TrainingClass{}, trainer.Trainer{}); err != nil {
+	if err := dbConnection.DB.AutoMigrate(&users.User{}, &models.TrainingClass{}, trainer.Trainer{}, &models.Membership{}); err != nil {
 		fmt.Printf("failed to migrate database: %v\n", err)
 		return
 	}
-	classHandler, trainerHandler := initHandler()
+	classHandler, trainerHandler, membershipHandler := initHandler()
 	r := gin.Default()
-	routes.SetupRoutes(r, classHandler, trainerHandler)
+	routes.SetupRoutes(r, classHandler, trainerHandler, membershipHandler)
 
 	// Run the server and display server details
 	port := ":8080"
@@ -57,13 +58,16 @@ func displayBanner() {
 func initHandler() (
 	*trainingClassController.ClassHandler,
 	*trainerController.TrainerHandler,
+	*membershipController.MembershipHandler,
 ) {
 
 	classService := service.NewClassService()
 	trainerService := service.NewTrainerService()
+	membershipService := service.NewMembershipService()
 
 	classHandler := trainingClassController.NewClassHandler(classService)
 	trainerHandler := trainerController.NewTrainerHandler(trainerService)
+	membershipHandler := membershipController.NewMembershipHandler(membershipService)
 
-	return classHandler, trainerHandler
+	return classHandler, trainerHandler, membershipHandler
 }

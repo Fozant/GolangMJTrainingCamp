@@ -40,8 +40,7 @@ type User struct {
 	RegistrationDate time.Time `gorm:"type:datetime;not null" json:"registration_date"`
 	Password         string    `gorm:"type:varchar(255);not null" json:"password"`
 	Role             Role      `gorm:"type:varchar(50);not null" json:"role"`
-	IDTrainer        uint      `gorm:"unique;constraint:OnDelete:SET NULL;" json:"id_trainer"` // One-to-one relationship
-
+	IDTrainer        *uint     `gorm:"unique;constraint:OnDelete:SET NULL;" json:"id_trainer"`
 }
 
 func (u *User) GetAuthorities() []string {

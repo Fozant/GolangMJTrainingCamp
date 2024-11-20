@@ -89,7 +89,7 @@ func WithJWTAuth(c *gin.Context) {
 
 // CreateJWT generates a JWT token with a specified expiration and userID claim
 func CreateJWT(secret []byte, userID int) (string, error) {
-	expiration := time.Second * time.Duration(3600)
+	expiration := time.Second * time.Duration(360000)
 	log.Printf("Creating JWT with expiration: %d seconds", 3600*24*7)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
