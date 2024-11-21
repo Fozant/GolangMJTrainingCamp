@@ -6,7 +6,7 @@ import (
 	trainingClassController "GoMJTrainingCamp/controller"
 	"GoMJTrainingCamp/dbs/dbConnection"
 	"GoMJTrainingCamp/dbs/models"
-	trainer "GoMJTrainingCamp/dbs/models/trainer"
+	"GoMJTrainingCamp/dbs/models/trainer"
 	users "GoMJTrainingCamp/dbs/models/users"
 	"GoMJTrainingCamp/routes"
 	"GoMJTrainingCamp/service"
@@ -28,7 +28,7 @@ func main() {
 		fmt.Println("✅ Database Connection Successful!")
 	}
 
-	if err := dbConnection.DB.AutoMigrate(&users.User{}, &models.TrainingClass{}, trainer.Trainer{}, &models.Membership{}); err != nil {
+	if err := dbConnection.DB.AutoMigrate(&users.User{}, &models.TrainingClass{}, trainer.Trainer{}, &models.Membership{}, &models.Transaction{}); err != nil {
 		fmt.Printf("failed to migrate database: %v\n", err)
 		return
 	}
@@ -64,10 +64,16 @@ func initHandler() (
 	classService := service.NewClassService()
 	trainerService := service.NewTrainerService()
 	membershipService := service.NewMembershipService()
+	transactionService := service.NewTransactionService()
 
 	classHandler := trainingClassController.NewClassHandler(classService)
 	trainerHandler := trainerController.NewTrainerHandler(trainerService)
-	membershipHandler := membershipController.NewMembershipHandler(membershipService)
+	membershipHandler := membershipController.NewMembershipHandler(membershipService, transactionService)
 
 	return classHandler, trainerHandler, membershipHandler
+}
+
+func automigrate() string {
+
+	return "&users.User{}, &models.TrainingClass{}, trainer.Trainer{}, &models.Membership{},&models.Transaction{}"
 }

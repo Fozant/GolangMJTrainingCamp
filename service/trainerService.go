@@ -22,5 +22,5 @@ func (s *TrainerService) AddTrainer(trainer *trainer2.Trainer) (idTrainer uint, 
 		log.Printf("Error creating class: %v", result.Error)
 		return 0, errors.New("database error")
 	}
-	return trainer.IDTrainer, nil
+	return trainer.ID, nil
 }

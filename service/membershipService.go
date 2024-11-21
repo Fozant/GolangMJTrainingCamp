@@ -8,7 +8,8 @@ import (
 )
 
 type MembershipServiceInterface interface {
-	BuyMembership(membership *models.Membership) error
+	BuyMembership(membership *models.Membership) (uint, error)
+	UpdateTransactionID(membershipID uint, transactionID uint) error
 }
 type MembershipService struct {
 }
@@ -17,15 +18,20 @@ func NewMembershipService() MembershipServiceInterface {
 	return &MembershipService{}
 }
 
-func (s *MembershipService) BuyMembership(membership *models.Membership) error {
+func (s *MembershipService) BuyMembership(membership *models.Membership) (uint, error) {
 	var user users.User
 
 	if err := dbConnection.DB.First(&user, membership.UserID).Error; err != nil {
-		return fmt.Errorf("user not found: %w", err)
+		return 0, fmt.Errorf("user not found: %w", err)
 	}
 
 	if err := dbConnection.DB.Create(&membership).Error; err != nil {
-		return fmt.Errorf("failed to create membership: %w", err)
+		return 0, fmt.Errorf("failed to create membership: %w", err)
 	}
-	return nil
+	return membership.IDMembership, nil
+}
+func (s *MembershipService) UpdateTransactionID(membershipID uint, transactionID uint) error {
+	return dbConnection.DB.Model(&models.Membership{}).
+		Where("id_membership = ?", membershipID).
+		Update("id_transaction", transactionID).Error
 }

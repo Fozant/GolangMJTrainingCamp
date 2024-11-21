@@ -1,11 +1,12 @@
 package models
 
 import (
+	"gorm.io/gorm"
 	"time"
 )
 
 type TrainingClass struct {
-	IDTrainingClass  uint      `gorm:"primaryKey;autoIncrement" json:"id_trainingClass"`
+	gorm.Model
 	ClassName        string    `gorm:"type:varchar(255);not null" json:"className"`
 	ClassRequirement string    `gorm:"type:text" json:"classRequirement,omitempty"`
 	ClassNote        string    `gorm:"type:text" json:"classNote,omitempty"`

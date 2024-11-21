@@ -2,11 +2,12 @@ package trainer
 
 import (
 	"GoMJTrainingCamp/dbs/dbConnection"
+	"gorm.io/gorm"
 	"log"
 )
 
 type Trainer struct {
-	IDTrainer          uint   `gorm:"primaryKey;autoIncrement" json:"id_trainer"`
+	gorm.Model
 	TrainerName        string `gorm:"type:varchar(100);not null" json:"trainer_name"`
 	TrainerDescription string `gorm:"type:text" json:"trainer_description"`
 }
