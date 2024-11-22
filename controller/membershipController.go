@@ -33,14 +33,14 @@ func (h *MembershipHandler) BuyMembership(c *gin.Context) {
 	var request BuyMembershipRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
-		fmt.Println("Request Body:", c.Request.Body) // Debugging step
+		fmt.Println("Request Body:", c.Request.Body)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
 	startDate, err := utils.ParseFormattedDate(request.StartDate)
 	if err != nil {
-		fmt.Println("start date:", request.StartDate) // Debugging step
+		fmt.Println("start date:", request.StartDate)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Invalid start date format. Expected yyyy-mm-dd"})
 		return
 	}
@@ -64,7 +64,7 @@ func (h *MembershipHandler) BuyMembership(c *gin.Context) {
 		return
 	}
 	transaction := models.Transaction{
-		MembershipID:     membershipID,
+		MembershipID:     &membershipID,
 		PaymentType:      "Membership",
 		PaymentMethod:    request.PaymentMethod,
 		TransactionPrice: request.TransactionPrice,
