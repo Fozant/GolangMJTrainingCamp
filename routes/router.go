@@ -5,6 +5,7 @@ import (
 	membershipController "GoMJTrainingCamp/controller"
 	trainerController "GoMJTrainingCamp/controller"
 	trainingClassController "GoMJTrainingCamp/controller"
+	transactionController "GoMJTrainingCamp/controller"
 	visitPackageController "GoMJTrainingCamp/controller"
 	"GoMJTrainingCamp/service"
 	"github.com/gin-gonic/gin"
@@ -12,12 +13,14 @@ import (
 
 func SetupRoutes(r *gin.Engine, classHandler *trainingClassController.
 	ClassHandler, trainerHandler *trainerController.TrainerHandler, membershipHandler *membershipController.MembershipHandler,
-	visitHandler *visitPackageController.VisitHandler) {
+	visitHandler *visitPackageController.VisitHandler,
+	transactionHandler *transactionController.TransactionHandler) {
 	authRoutes(r)
 	classRoutes(r, classHandler)
 	trainerRoutes(r, trainerHandler)
 	membershipRoutes(r, membershipHandler)
 	visitRoutes(r, visitHandler)
+	transactionRoutes(r, transactionHandler)
 
 }
 
@@ -36,6 +39,11 @@ func trainerRoutes(r *gin.Engine, handler *trainerController.TrainerHandler) {
 	trainerGroup := r.Group("/api/trainer")
 	trainerGroup.Use(service.WithJWTAuth)
 	trainerGroup.POST("/add", handler.AddTrainer)
+}
+func transactionRoutes(r *gin.Engine, handler *transactionController.TransactionHandler) {
+	trainerGroup := r.Group("/api/transaction")
+	trainerGroup.Use(service.WithJWTAuth)
+	trainerGroup.POST("/verify", handler.VerifyTransaction)
 }
 func membershipRoutes(r *gin.Engine, handler *membershipController.MembershipHandler) {
 	trainerGroup := r.Group("/api/membership")

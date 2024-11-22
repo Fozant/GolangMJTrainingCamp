@@ -4,6 +4,7 @@ import (
 	membershipController "GoMJTrainingCamp/controller"
 	trainerController "GoMJTrainingCamp/controller"
 	trainingClassController "GoMJTrainingCamp/controller"
+	transactionController "GoMJTrainingCamp/controller"
 	visitPackageController "GoMJTrainingCamp/controller"
 
 	"GoMJTrainingCamp/dbs/dbConnection"
@@ -34,9 +35,9 @@ func main() {
 		fmt.Printf("failed to migrate database: %v\n", err)
 		return
 	}
-	classHandler, trainerHandler, membershipHandler, visitHandler := initHandler()
+	classHandler, trainerHandler, membershipHandler, visitHandler, transactionHandler := initHandler()
 	r := gin.Default()
-	routes.SetupRoutes(r, classHandler, trainerHandler, membershipHandler, visitHandler)
+	routes.SetupRoutes(r, classHandler, trainerHandler, membershipHandler, visitHandler, transactionHandler)
 
 	// Run the server and display server details
 	port := ":8080"
@@ -62,6 +63,7 @@ func initHandler() (
 	*trainerController.TrainerHandler,
 	*membershipController.MembershipHandler,
 	*visitPackageController.VisitHandler,
+	*transactionController.TransactionHandler,
 ) {
 
 	classService := service.NewClassService()
@@ -74,8 +76,9 @@ func initHandler() (
 	trainerHandler := trainerController.NewTrainerHandler(trainerService)
 	membershipHandler := membershipController.NewMembershipHandler(membershipService, transactionService)
 	visitHandler := visitPackageController.NewVisitHandler(visitPackageService, transactionService)
+	transactionHandler := transactionController.NewTransactionHandler(transactionService)
 
-	return classHandler, trainerHandler, membershipHandler, visitHandler
+	return classHandler, trainerHandler, membershipHandler, visitHandler, transactionHandler
 }
 
 func automigrate() string {
