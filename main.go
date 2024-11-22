@@ -35,6 +35,11 @@ func main() {
 		fmt.Printf("failed to migrate database: %v\n", err)
 		return
 	}
+
+	if err := dbConnection.DB.AutoMigrate(&models.TrainingClassDetail{}); err != nil {
+		fmt.Printf("failed to migrate database: %v\n", err)
+		return
+	}
 	classHandler, trainerHandler, membershipHandler, visitHandler, transactionHandler := initHandler()
 	r := gin.Default()
 	routes.SetupRoutes(r, classHandler, trainerHandler, membershipHandler, visitHandler, transactionHandler)

@@ -16,6 +16,12 @@ type CreateClassRequest struct {
 	ClassCapacity    int64     `json:"classCapacity" binding:"required"`
 }
 
+type BookClassRequest struct {
+	IDClass uint   `json:"idClass" binding:"required"`
+	IDUser  uint   `json:"idUser,omitempty"`
+	Type    string `json:"type" binding:"required"`
+}
+
 type ClassHandler struct {
 	ClassService service.ClassServiceInterface
 }
@@ -57,34 +63,11 @@ func (h *ClassHandler) GetClasses(c *gin.Context) {
 	utils.SendSuccessResponse(c, "Classes found", classes)
 
 }
+func (h *ClassHandler) BookClass(c *gin.Context) {
+	var request BookClassRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
 
-//func GetClasses(c *gin.Context) {
-//	id := c.Query("id")
-//	date := c.Query("date")
-//
-//	var classes []models.TrainingClass
-//
-//	// Check if 'id' parameter is provided
-//	if id != "" {
-//		err := dbConnection.DB.Where("id = ?", id).Find(&classes).Error
-//		if err != nil {
-//			utils.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
-//			return
-//		}
-//	} else if date != "" {
-//		// Check if 'date' parameter is provided
-//		err := dbConnection.DB.Where("Date = ?", date).Find(&classes).Error
-//		if err != nil {
-//			utils.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
-//			return
-//		}
-//	} else {
-//		// No parameter, get all classes
-//		err := dbConnection.DB.Find(&classes).Error
-//		if err != nil {
-//			utils.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
-//			return
-//		}
-//	}
-//	utils.SendSuccessResponse(c, "Classes found", classes)
-//}
+}
