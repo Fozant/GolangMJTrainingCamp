@@ -22,10 +22,7 @@ func (s *TransactionService) CreateTransaction(transaction *models.Transaction) 
 	if err := dbConnection.DB.Create(transaction).Error; err != nil {
 		return 0, fmt.Errorf("failed to create transaction: %w", err)
 	}
-	fmt.Println(transaction.IDTransaction)
-	fmt.Println(transaction.IDTransaction)
-	fmt.Println(transaction.IDTransaction)
-	fmt.Println(transaction.IDTransaction)
+
 	return transaction.IDTransaction, nil
 }
 func (s *TransactionService) GetById(id uint) (*models.Transaction, error) {

@@ -6,7 +6,9 @@ import (
 	"GoMJTrainingCamp/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
+
 	"time"
 )
 
@@ -28,8 +30,9 @@ type ClassHandler struct {
 	MembershipService service.MembershipServiceInterface
 }
 
-func NewClassHandler(classService service.ClassServiceInterface) *ClassHandler {
-	return &ClassHandler{ClassService: classService}
+func NewClassHandler(classService service.ClassServiceInterface, membershipService service.MembershipServiceInterface) *ClassHandler {
+	return &ClassHandler{ClassService: classService,
+		MembershipService: membershipService}
 }
 
 func (h *ClassHandler) CreateClass(c *gin.Context) {
@@ -118,6 +121,37 @@ func (h *ClassHandler) BookClass(c *gin.Context) {
 		UserID:          &request.IDUser,
 		TrainingClassID: &classes[0].IDTrainingClass,
 	}
+
+	result, err := h.MembershipService.GetMembershipByUser(request.IDUser)
+	if err != nil {
+		log.Printf("Error getting user membership: %v", err)
+		utils.SendErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Error getting user membership: %v", err))
+		return
+	}
+
+	if len(result) == 0 {
+		utils.SendErrorResponse(c, http.StatusNotFound, "No memberships found for the user")
+		return
+	}
+	classDate := classes[0].ClassDateTime
+
+	hasActiveMembership := false
+	for _, entry := range result {
+		fmt.Println(entry.PaymentStatus)
+		fmt.Println("Aaaa" + entry.PaymentStatus)
+		if entry.StartDate.Before(classDate) &&
+			entry.EndDate.After(classDate) &&
+			entry.PaymentStatus == "VERIFIED" {
+
+			hasActiveMembership = true
+			break
+		}
+	}
+
+	if !hasActiveMembership {
+		utils.SendErrorResponse(c, http.StatusForbidden, "User does not have an active membership or membership is not verified for this class date.")
+		return
+	}
 	err = h.ClassService.BookClass(&trainingClassDetail)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -126,17 +160,6 @@ func (h *ClassHandler) BookClass(c *gin.Context) {
 		})
 		return
 	}
-	memberships, err := h.MembershipService.GetMembershipByUser(request.IDUser)
-	if err != nil {
-		utils.SendErrorResponse(c, http.StatusInternalServerError, "Failed to fetch memberships")
-		return
-	}
+	utils.SendSuccessResponse(c, "Successfully booked class", nil)
 
-	if len(memberships) == 0 {
-		utils.SendErrorResponse(c, http.StatusNotFound, "No memberships found for the user")
-		return
-	}
-	//memberships[0].
-
-	utils.SendSuccessResponse(c, "successfully booked class", nil)
 }

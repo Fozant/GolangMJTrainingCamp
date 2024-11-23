@@ -71,17 +71,17 @@ func (h *MembershipHandler) BuyMembership(c *gin.Context) {
 	}
 	transactionID, err := h.TransactionService.CreateTransaction(&transaction)
 	if err != nil {
-		log.Printf("Error creating transaction: %v", err)
+		log.Printf("Error creating transaction: with id %d,%v", transactionID, err)
 		utils.SendErrorResponse(c, http.StatusInternalServerError, "Failed to create transaction")
 		return
 	}
 
-	err = h.MembershipService.UpdateTransactionID(membershipID, transactionID)
-	if err != nil {
-		log.Printf("Error updating transaction ID in membership: %v", err)
-		utils.SendErrorResponse(c, http.StatusInternalServerError, "Failed to update transaction ID")
-		return
-	}
+	//err = h.MembershipService.UpdateTransactionID(membershipID, transactionID)
+	//if err != nil {
+	//	log.Printf("Error updating transaction ID in membership: %v", err)
+	//	utils.SendErrorResponse(c, http.StatusInternalServerError, "Failed to update transaction ID")
+	//	return
+	//}
 
 	utils.SendSuccessResponse(c, "Successfully bought membership", nil)
 }
