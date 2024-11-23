@@ -76,7 +76,7 @@ func initHandler() (
 	visitPackageService := service.NewVisitService()
 
 	// Initialize the handlers with the corresponding services
-	classHandler := controller.NewClassHandler(classService, membershipService)
+	classHandler := controller.NewClassHandler(classService, membershipService, visitPackageService)
 	trainerHandler := controller.NewTrainerHandler(trainerService)
 	membershipHandler := controller.NewMembershipHandler(membershipService, transactionService)
 	visitHandler := controller.NewVisitHandler(visitPackageService, transactionService)

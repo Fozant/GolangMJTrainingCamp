@@ -68,6 +68,7 @@ func (h *MembershipHandler) BuyMembership(c *gin.Context) {
 		PaymentType:      "Membership",
 		PaymentMethod:    request.PaymentMethod,
 		TransactionPrice: request.TransactionPrice,
+		PaymentStatus:    "waiting for approval",
 	}
 	transactionID, err := h.TransactionService.CreateTransaction(&transaction)
 	if err != nil {

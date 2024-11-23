@@ -49,6 +49,5 @@ func (s *TransactionService) UpdateTransaction(transaction *models.Transaction) 
 	if err := dbConnection.DB.Model(&models.Transaction{}).Where("id_transaction = ?", transaction.IDTransaction).Updates(transaction).Error; err != nil {
 		return fmt.Errorf("failed to update transaction: %w", err)
 	}
-
 	return nil
 }

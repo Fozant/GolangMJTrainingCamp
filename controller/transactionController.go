@@ -37,7 +37,8 @@ func (h *TransactionHandler) VerifyTransaction(c *gin.Context) {
 	}
 
 	if err := h.TransactionService.UpdateTransaction(&transaction); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create class"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update status"})
+		return
 	}
 	utils.SendSuccessResponse(c, "Update transaction sucessfull", transaction)
 }

@@ -10,12 +10,12 @@ import (
 )
 
 type MembershipWithTransaction struct {
-	MembershipID  uint      `json:"id"`
-	UserID        uint      `json:"user_id"`
-	StartDate     time.Time `json:"start_date"`
-	EndDate       time.Time `json:"end_date"`
-	TransactionID uint      `json:"transaction_id"`
-	PaymentStatus string    `json:"paymentStatus"`
+	MembershipID  uint      `json:"id" gorm:"column:id_membership"`
+	UserID        uint      `json:"user_id" gorm:"column:user_id"`
+	StartDate     time.Time `json:"start_date" gorm:"column:start_date"`
+	EndDate       time.Time `json:"end_date" gorm:"column:end_date"`
+	TransactionID uint      `json:"transaction_id" gorm:"column:id_transaction"`
+	PaymentStatus string    `json:"paymentStatus" gorm:"column:paymentStatus"`
 }
 
 type MembershipServiceInterface interface {
@@ -56,8 +56,7 @@ func (s *MembershipService) GetMembershipByUser(userID uint) ([]MembershipWithTr
     LEFT JOIN transactions ON memberships.id_membership = transactions.membership_id
     WHERE memberships.user_id = ?
 `, userID).Scan(&results).Error
-	fmt.Println(results)
-	// Check for specific database errors
+
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			// Handle case when no records are found for the user
