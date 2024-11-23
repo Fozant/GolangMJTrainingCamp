@@ -1,8 +1,8 @@
 package models
 
 type Transaction struct {
-	IDTransaction     uint          `gorm:"primaryKey;autoIncrement;type:bigint unsigned" json:"id"`
-	MembershipID      *uint         `gorm:"type:bigint unsigned" json:"id"`
+	IDTransaction     uint          `gorm:"primaryKey;autoIncrement" json:"id"`
+	MembershipID      *uint         `json:"id"`
 	Membership        *Membership   `gorm:"foreignKey:MembershipID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	VisitPackageID    *uint         `gorm:"column:Visit_id"`
 	VisitPackage      *VisitPackage `gorm:"foreignKey:VisitPackageID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`

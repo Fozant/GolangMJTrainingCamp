@@ -1,12 +1,7 @@
 package main
 
 import (
-	membershipController "GoMJTrainingCamp/controller"
-	trainerController "GoMJTrainingCamp/controller"
-	trainingClassController "GoMJTrainingCamp/controller"
-	transactionController "GoMJTrainingCamp/controller"
-	visitPackageController "GoMJTrainingCamp/controller"
-
+	"GoMJTrainingCamp/controller"
 	"GoMJTrainingCamp/dbs/dbConnection"
 	"GoMJTrainingCamp/dbs/models"
 	"GoMJTrainingCamp/dbs/models/trainer"
@@ -31,7 +26,7 @@ func main() {
 		fmt.Println("✅ Database Connection Successful!")
 	}
 
-	if err := dbConnection.DB.AutoMigrate(&users.User{}, &models.TrainingClass{}, trainer.Trainer{}, &models.Membership{}, &models.Transaction{}); err != nil {
+	if err := dbConnection.DB.AutoMigrate(&users.User{}, &models.TrainingClass{}, trainer.Trainer{}, &models.Transaction{}, &models.Membership{}, &models.VisitPackage{}); err != nil {
 		fmt.Printf("failed to migrate database: %v\n", err)
 		return
 	}
@@ -40,6 +35,7 @@ func main() {
 		fmt.Printf("failed to migrate database: %v\n", err)
 		return
 	}
+
 	classHandler, trainerHandler, membershipHandler, visitHandler, transactionHandler := initHandler()
 	r := gin.Default()
 	routes.SetupRoutes(r, classHandler, trainerHandler, membershipHandler, visitHandler, transactionHandler)
@@ -52,6 +48,7 @@ func main() {
 	if err := r.Run(port); err != nil {
 		log.Fatalf("❌ Server failed to start: %v", err)
 	}
+
 }
 
 func displayBanner() {
@@ -63,30 +60,28 @@ func displayBanner() {
 	fmt.Println("Starting Application...")
 	fmt.Println()
 }
-func initHandler() (
-	*trainingClassController.ClassHandler,
-	*trainerController.TrainerHandler,
-	*membershipController.MembershipHandler,
-	*visitPackageController.VisitHandler,
-	*transactionController.TransactionHandler,
-) {
 
+func initHandler() (
+	*controller.ClassHandler,
+	*controller.TrainerHandler,
+	*controller.MembershipHandler,
+	*controller.VisitHandler,
+	*controller.TransactionHandler,
+) {
+	// Initialize the services
 	classService := service.NewClassService()
 	trainerService := service.NewTrainerService()
 	membershipService := service.NewMembershipService()
 	transactionService := service.NewTransactionService()
 	visitPackageService := service.NewVisitService()
 
-	classHandler := trainingClassController.NewClassHandler(classService)
-	trainerHandler := trainerController.NewTrainerHandler(trainerService)
-	membershipHandler := membershipController.NewMembershipHandler(membershipService, transactionService)
-	visitHandler := visitPackageController.NewVisitHandler(visitPackageService, transactionService)
-	transactionHandler := transactionController.NewTransactionHandler(transactionService)
+	// Initialize the handlers with the corresponding services
+	classHandler := controller.NewClassHandler(classService)
+	trainerHandler := controller.NewTrainerHandler(trainerService)
+	membershipHandler := controller.NewMembershipHandler(membershipService, transactionService)
+	visitHandler := controller.NewVisitHandler(visitPackageService, transactionService)
+	transactionHandler := controller.NewTransactionHandler(transactionService)
 
+	// Return the handlers to be used in the main function
 	return classHandler, trainerHandler, membershipHandler, visitHandler, transactionHandler
-}
-
-func automigrate() string {
-
-	return "&users.User{}, &models.TrainingClass{}, trainer.Trainer{}, &models.Membership{},&models.Transaction{}"
 }

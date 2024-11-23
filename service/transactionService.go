@@ -9,7 +9,7 @@ import (
 )
 
 type TransactionServiceInterface interface {
-	CreateTransaction(transaction *models.Transaction) error
+	CreateTransaction(transaction *models.Transaction) (uint, error)
 	UpdateTransaction(transaction *models.Transaction) error
 }
 type TransactionService struct{}
@@ -18,11 +18,15 @@ func NewTransactionService() TransactionServiceInterface {
 	return &TransactionService{}
 }
 
-func (s *TransactionService) CreateTransaction(transaction *models.Transaction) error {
+func (s *TransactionService) CreateTransaction(transaction *models.Transaction) (uint, error) {
 	if err := dbConnection.DB.Create(transaction).Error; err != nil {
-		return fmt.Errorf("failed to create transaction: %w", err)
+		return 0, fmt.Errorf("failed to create transaction: %w", err)
 	}
-	return nil
+	fmt.Println(transaction.IDTransaction)
+	fmt.Println(transaction.IDTransaction)
+	fmt.Println(transaction.IDTransaction)
+	fmt.Println(transaction.IDTransaction)
+	return transaction.IDTransaction, nil
 }
 func (s *TransactionService) GetById(id uint) (*models.Transaction, error) {
 	var transaction models.Transaction

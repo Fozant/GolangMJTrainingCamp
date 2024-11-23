@@ -10,6 +10,7 @@ import (
 type MembershipServiceInterface interface {
 	BuyMembership(membership *models.Membership) (uint, error)
 	UpdateTransactionID(membershipID uint, transactionID uint) error
+	GetMembershipByUser(membershipID uint) ([]models.Membership, error)
 }
 type MembershipService struct {
 }
@@ -34,4 +35,13 @@ func (s *MembershipService) UpdateTransactionID(membershipID uint, transactionID
 	return dbConnection.DB.Model(&models.Membership{}).
 		Where("id_membership = ?", membershipID).
 		Update("id_transaction", transactionID).Error
+}
+
+func (s *MembershipService) GetMembershipByUser(userID uint) ([]models.Membership, error) {
+	var memberships []models.Membership
+
+	if err := dbConnection.DB.Where("user_id = ?", userID).Find(&memberships).Error; err != nil {
+		return nil, err
+	}
+	return memberships, nil
 }

@@ -6,7 +6,7 @@ import (
 )
 
 type Membership struct {
-	IDMembership uint        `gorm:"primaryKey;autoIncrement;type:bigint unsigned" json:"id"`
+	IDMembership uint        `gorm:"primaryKey;autoIncrement" json:"id"`
 	UserID       uint        `json:"user_id"`
 	User         models.User `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"user"`
 	StartDate    time.Time   `gorm:"type:datetime;not null" json:"startDate"`

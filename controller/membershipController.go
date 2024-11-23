@@ -69,12 +69,19 @@ func (h *MembershipHandler) BuyMembership(c *gin.Context) {
 		PaymentMethod:    request.PaymentMethod,
 		TransactionPrice: request.TransactionPrice,
 	}
-	if err := h.TransactionService.CreateTransaction(&transaction); err != nil {
-
+	transactionID, err := h.TransactionService.CreateTransaction(&transaction)
+	if err != nil {
 		log.Printf("Error creating transaction: %v", err)
-
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Failed to create transaction"})
+		utils.SendErrorResponse(c, http.StatusInternalServerError, "Failed to create transaction")
 		return
 	}
+
+	err = h.MembershipService.UpdateTransactionID(membershipID, transactionID)
+	if err != nil {
+		log.Printf("Error updating transaction ID in membership: %v", err)
+		utils.SendErrorResponse(c, http.StatusInternalServerError, "Failed to update transaction ID")
+		return
+	}
+
 	utils.SendSuccessResponse(c, "Successfully bought membership", nil)
 }
