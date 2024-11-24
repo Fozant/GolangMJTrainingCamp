@@ -37,6 +37,7 @@ type ClassMember struct {
 type ClassServiceInterface interface {
 	CreateTrainingClass(class *models.TrainingClass) error
 	GetClasses(id, date string) ([]GetClassResponse, error)
+	GetClassesHistory(userID uint) ([]GetClassResponse, error)
 	BookClass(classDetail *models.TrainingClassDetail) error
 	AlreadyBooked(userID, trainingClassID uint) (bool, error)
 	CountParticipant(trainingClassID uint) (uint, error)
@@ -120,6 +121,82 @@ func (s *ClassService) GetClasses(id, date string) ([]GetClassResponse, error) {
 
 	return responses, nil
 }
+func (s *ClassService) GetClassesHistory(userID uint) ([]GetClassResponse, error) {
+	var responses []GetClassResponse
+	var classDetails []models.TrainingClassDetail
+
+	// Find class details where the user has participated
+	if err := dbConnection.DB.Where("user_id = ?", userID).Find(&classDetails).Error; err != nil {
+		return nil, fmt.Errorf("failed to retrieve class history for user ID %d: %w", userID, err)
+	}
+	if len(classDetails) == 0 {
+		return nil, fmt.Errorf("no class history found for user ID %d", userID)
+	}
+
+	// Retrieve unique class IDs from the user's class details
+	classIDMap := make(map[uint]bool)
+	for _, detail := range classDetails {
+		classIDMap[*detail.TrainingClassID] = true
+	}
+
+	// Retrieve the actual class information
+	var classIDs []uint
+	for id := range classIDMap {
+		classIDs = append(classIDs, id)
+	}
+
+	var classes []models.TrainingClass
+	if err := dbConnection.DB.Where("id_training_class IN (?)", classIDs).Find(&classes).Error; err != nil {
+		return nil, fmt.Errorf("failed to retrieve class details: %w", err)
+	}
+
+	for _, class := range classes {
+		// Retrieve trainer information
+		var trainer trainer.Trainer
+		if err := dbConnection.DB.Where("id = ?", class.TrainerID).First(&trainer).Error; err != nil {
+			return nil, fmt.Errorf("failed to retrieve trainer for class ID %d: %w", class.IDTrainingClass, err)
+		}
+
+		// Retrieve all members for this class
+		var members []models.TrainingClassDetail
+		if err := dbConnection.DB.Where("training_class_id = ?", class.IDTrainingClass).Find(&members).Error; err != nil {
+			return nil, fmt.Errorf("failed to retrieve members for class ID %d: %w", class.IDTrainingClass, err)
+		}
+
+		// Populate class members
+		var classMembers []ClassMember
+		for _, member := range members {
+			var user users.User
+			if err := dbConnection.DB.Where("id_user = ?", member.UserID).First(&user).Error; err != nil {
+				return nil, fmt.Errorf("failed to retrieve user details for member ID %d: %w", member.UserID, err)
+			}
+			classMembers = append(classMembers, ClassMember{
+				IDUser:  user.IDUser,
+				Name:    user.Name,
+				Email:   user.Email,
+				PNumber: user.PNumber,
+			})
+		}
+
+		// Append the class to the response
+		responses = append(responses, GetClassResponse{
+			IDClass:          class.IDTrainingClass,
+			ClassDate:        class.ClassDateTime,
+			ClassCapacity:    class.ClassCapacity,
+			ClassRequirement: class.ClassRequirement,
+			ClassName:        class.ClassName,
+			TrainerDetail: TrainerDetail{
+				IDTrainer:          trainer.ID,
+				TrainerName:        trainer.TrainerName,
+				TrainerDescription: trainer.TrainerDescription,
+			},
+			ClassMembers: classMembers,
+		})
+	}
+
+	return responses, nil
+}
+
 func (s *ClassService) BookClass(classDetail *models.TrainingClassDetail) error {
 
 	if result := dbConnection.DB.Create(&classDetail); result.Error != nil {

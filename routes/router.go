@@ -38,6 +38,7 @@ func classRoutes(r *gin.Engine, handler *trainingClassController.ClassHandler) {
 	classGroup.Use(service.WithJWTAuth) // JWT middleware for these routes
 	classGroup.POST("/add", handler.CreateClass)
 	classGroup.GET("/get", handler.GetClasses)
+	classGroup.GET("/getHistory", handler.GetClassesHistory)
 	classGroup.POST("/book", handler.BookClass)
 }
 

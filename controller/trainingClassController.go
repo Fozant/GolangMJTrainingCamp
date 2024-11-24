@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
-
+	"strconv"
 	"time"
 )
 
@@ -73,6 +73,31 @@ func (h *ClassHandler) GetClasses(c *gin.Context) {
 	}
 	utils.SendSuccessResponse(c, "Classes found", classes)
 }
+
+func (h *ClassHandler) GetClassesHistory(c *gin.Context) {
+	idUserStr := c.DefaultQuery("idUser", "")
+	idUser, err := strconv.ParseUint(idUserStr, 10, 32)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid idUser parameter"})
+		fmt.Println(idUser)
+		fmt.Println(idUser)
+		fmt.Println(idUser)
+		fmt.Println(idUser)
+		return
+	}
+	idUserUint := uint(idUser)
+
+	classes, err := h.ClassService.GetClassesHistory(idUserUint)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"status":  http.StatusNotFound,
+			"message": err.Error(),
+		})
+		return
+	}
+	utils.SendSuccessResponse(c, "Classes found", classes)
+}
+
 func (h *ClassHandler) BookClass(c *gin.Context) {
 	// Step 1: Parse request body
 	var request BookClassRequest
