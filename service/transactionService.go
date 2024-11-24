@@ -11,11 +11,18 @@ import (
 type TransactionServiceInterface interface {
 	CreateTransaction(transaction *models.Transaction) (uint, error)
 	UpdateTransaction(transaction *models.Transaction) error
+	GetTransactionAll() ([]models.Transaction, error)
+	GetTransactionById(id uint) (*GetTransactionById, error)
 }
 type TransactionService struct{}
 
 func NewTransactionService() TransactionServiceInterface {
 	return &TransactionService{}
+}
+
+type GetTransactionById struct {
+	TrasactionID uint                `json:"idTransaction"`
+	Transaction  *models.Transaction `json:"transaction"`
 }
 
 func (s *TransactionService) CreateTransaction(transaction *models.Transaction) (uint, error) {
@@ -50,4 +57,33 @@ func (s *TransactionService) UpdateTransaction(transaction *models.Transaction) 
 		return fmt.Errorf("failed to update transaction: %w", err)
 	}
 	return nil
+}
+func (s *TransactionService) GetTransactionAll() ([]models.Transaction, error) {
+	var transaction []models.Transaction
+	if err := dbConnection.DB.Find(&transaction).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("get transaction failed")
+		}
+	}
+	return transaction, nil
+}
+func (s *TransactionService) GetTransactionById(id uint) (*GetTransactionById, error) {
+	var transaction models.Transaction
+
+	// Preload related VisitPackage and Membership
+	if err := dbConnection.DB.
+		Preload("VisitPackage").Preload("Membership").
+		First(&transaction, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("transaction with ID %d not found", id)
+		}
+		return nil, fmt.Errorf("failed to get transaction by ID: %w", err)
+	}
+
+	response := &GetTransactionById{
+		TrasactionID: transaction.IDTransaction,
+		Transaction:  &transaction,
+	}
+
+	return response, nil
 }

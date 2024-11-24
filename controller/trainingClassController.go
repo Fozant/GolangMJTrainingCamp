@@ -65,10 +65,7 @@ func (h *ClassHandler) GetClasses(c *gin.Context) {
 
 	classes, err := h.ClassService.GetClasses(id, date)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"status":  http.StatusNotFound,
-			"message": err.Error(),
-		})
+		utils.SendErrorResponse(c, http.StatusInternalServerError, "Failed to get classes")
 		return
 	}
 	utils.SendSuccessResponse(c, "Classes found", classes)
@@ -78,21 +75,14 @@ func (h *ClassHandler) GetClassesHistory(c *gin.Context) {
 	idUserStr := c.DefaultQuery("idUser", "")
 	idUser, err := strconv.ParseUint(idUserStr, 10, 32)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "Invalid idUser parameter"})
-		fmt.Println(idUser)
-		fmt.Println(idUser)
-		fmt.Println(idUser)
-		fmt.Println(idUser)
+		utils.SendErrorResponse(c, http.StatusInternalServerError, "invalid id")
 		return
 	}
 	idUserUint := uint(idUser)
 
 	classes, err := h.ClassService.GetClassesHistory(idUserUint)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"status":  http.StatusNotFound,
-			"message": err.Error(),
-		})
+		utils.SendErrorResponse(c, http.StatusInternalServerError, "Failed to get user history")
 		return
 	}
 	utils.SendSuccessResponse(c, "Classes found", classes)

@@ -132,7 +132,6 @@ func (s *ClassService) GetClassesHistory(userID uint) ([]GetClassResponse, error
 	if len(classDetails) == 0 {
 		return nil, fmt.Errorf("no class history found for user ID %d", userID)
 	}
-
 	// Retrieve unique class IDs from the user's class details
 	classIDMap := make(map[uint]bool)
 	for _, detail := range classDetails {
@@ -162,7 +161,6 @@ func (s *ClassService) GetClassesHistory(userID uint) ([]GetClassResponse, error
 		if err := dbConnection.DB.Where("training_class_id = ?", class.IDTrainingClass).Find(&members).Error; err != nil {
 			return nil, fmt.Errorf("failed to retrieve members for class ID %d: %w", class.IDTrainingClass, err)
 		}
-
 		// Populate class members
 		var classMembers []ClassMember
 		for _, member := range members {
