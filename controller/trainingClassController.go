@@ -17,6 +17,7 @@ type CreateClassRequest struct {
 	ClassRequirement string    `json:"classRequirement,omitempty"`
 	ClassDateTime    time.Time `json:"ClassDateTime" binding:"required"`
 	ClassCapacity    uint      `json:"classCapacity" binding:"required"`
+	TrainerID        uint      `json:"trainerID" binding:"required"`
 }
 
 type BookClassRequest struct {
@@ -49,9 +50,11 @@ func (h *ClassHandler) CreateClass(c *gin.Context) {
 		ClassRequirement: request.ClassRequirement,
 		ClassDateTime:    request.ClassDateTime,
 		ClassCapacity:    request.ClassCapacity,
+		TrainerID:        request.TrainerID,
 	}
 	if err := h.ClassService.CreateTrainingClass(&class); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create class"})
+		return
 	}
 	utils.SendSuccessResponse(c, "add classes Succesfull", class)
 }
@@ -59,6 +62,7 @@ func (h *ClassHandler) CreateClass(c *gin.Context) {
 func (h *ClassHandler) GetClasses(c *gin.Context) {
 	id := c.DefaultQuery("id", "")
 	date := c.DefaultQuery("date", "")
+
 	classes, err := h.ClassService.GetClasses(id, date)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -97,7 +101,7 @@ func (h *ClassHandler) BookClass(c *gin.Context) {
 	}
 
 	// Step 4: Check if the user has already booked the class
-	alreadyBooked, err := h.ClassService.AlreadyBooked(request.IDUser, class.IDTrainingClass)
+	alreadyBooked, err := h.ClassService.AlreadyBooked(request.IDUser, class.IDClass)
 	if err != nil {
 		utils.SendErrorResponse(c, http.StatusInternalServerError, "Error checking booking status")
 		return
@@ -109,7 +113,7 @@ func (h *ClassHandler) BookClass(c *gin.Context) {
 
 	// Step 5: Verify user's membership/visit for the class date
 	if request.Type == "membership" {
-		hasMembership, err := h.verifyMembership(request.IDUser, class.ClassDateTime)
+		hasMembership, err := h.verifyMembership(request.IDUser, class.ClassDate)
 		if err != nil {
 			utils.SendErrorResponse(c, http.StatusForbidden, fmt.Sprintf("Membership verification failed: %v", err))
 			return
@@ -120,7 +124,7 @@ func (h *ClassHandler) BookClass(c *gin.Context) {
 		}
 		trainingClassDetail := models.TrainingClassDetail{
 			UserID:          &request.IDUser,
-			TrainingClassID: &class.IDTrainingClass,
+			TrainingClassID: &class.IDClass,
 		}
 		if err := h.ClassService.BookClass(&trainingClassDetail); err != nil {
 			utils.SendErrorResponse(c, http.StatusInternalServerError, "Failed to book the class")
@@ -160,7 +164,7 @@ func (h *ClassHandler) BookClass(c *gin.Context) {
 
 		trainingClassDetail := models.TrainingClassDetail{
 			UserID:          &request.IDUser,
-			TrainingClassID: &class.IDTrainingClass,
+			TrainingClassID: &class.IDClass,
 		}
 		if err := h.ClassService.BookClass(&trainingClassDetail); err != nil {
 			utils.SendErrorResponse(c, http.StatusInternalServerError, "Failed to book the class")
