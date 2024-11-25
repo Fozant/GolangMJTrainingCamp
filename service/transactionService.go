@@ -13,6 +13,7 @@ type TransactionServiceInterface interface {
 	UpdateTransaction(transaction *models.Transaction) error
 	GetTransactionAll() ([]models.Transaction, error)
 	GetTransactionById(id uint) (*GetTransactionById, error)
+	GetTransactionByUser(userID uint) ([]GetTransactionById, error)
 }
 type TransactionService struct{}
 
@@ -79,11 +80,34 @@ func (s *TransactionService) GetTransactionById(id uint) (*GetTransactionById, e
 		}
 		return nil, fmt.Errorf("failed to get transaction by ID: %w", err)
 	}
-
 	response := &GetTransactionById{
 		TrasactionID: transaction.IDTransaction,
 		Transaction:  &transaction,
 	}
-
 	return response, nil
+}
+func (s *TransactionService) GetTransactionByUser(userID uint) ([]GetTransactionById, error) {
+	var transactions []models.Transaction
+
+	err := dbConnection.DB.Raw(`
+		SELECT t.* 
+		FROM transactions t
+		LEFT JOIN memberships m ON t.membership_id = m.id_membership
+		LEFT JOIN visit_packages v ON t.Visit_id = v.id_visit_package
+		WHERE m.user_id = ? OR v.user_id = ?
+	`, userID, userID).Scan(&transactions).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch transactions for user ID %d: %w", userID, err)
+	}
+
+	var results []GetTransactionById
+	for _, transaction := range transactions {
+		response := GetTransactionById{
+			TrasactionID: transaction.IDTransaction,
+			Transaction:  &transaction,
+		}
+		results = append(results, response)
+	}
+
+	return results, nil
 }

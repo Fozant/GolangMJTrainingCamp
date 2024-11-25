@@ -48,6 +48,32 @@ func (h *TransactionHandler) GetTransaction(c *gin.Context) {
 	}
 
 }
+
+func (h *TransactionHandler) GetTransactionByUser(c *gin.Context) {
+	id := c.DefaultQuery("id", "")
+	if id != "" {
+		idTransaction, err := strconv.ParseUint(id, 10, 32)
+		if err != nil {
+			c.JSON(400, gin.H{"error": "Invalid idUser parameter"})
+			return
+		}
+		idTransactionrUint := uint(idTransaction)
+
+		response, err := h.TransactionService.GetTransactionByUser(idTransactionrUint)
+		if err != nil {
+			utils.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+		utils.SendSuccessResponse(c, "transaction found", response)
+	} else {
+		transaction, err := h.TransactionService.GetTransactionAll()
+		if err != nil {
+			utils.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+		}
+		utils.SendSuccessResponse(c, "transactions found", transaction)
+	}
+
+}
 func (h *TransactionHandler) VerifyTransaction(c *gin.Context) {
 	var request VerifyTransactionRequest
 

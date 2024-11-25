@@ -55,6 +55,7 @@ func transactionRoutes(r *gin.Engine, handler *transactionController.Transaction
 	transactionGroup.Use(service.WithJWTAuth) // JWT middleware for these routes
 	transactionGroup.POST("/verify", handler.VerifyTransaction)
 	transactionGroup.GET("/get", handler.GetTransaction)
+	transactionGroup.GET("/getbyuser", handler.GetTransactionByUser)
 }
 
 func membershipRoutes(r *gin.Engine, handler *membershipController.MembershipHandler) {

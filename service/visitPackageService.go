@@ -50,8 +50,6 @@ func (s *VisitService) GetVisitByUser(userID uint) ([]VisitWithTransaction, erro
     LEFT JOIN transactions ON visit_packages.id_visit_package = transactions.Visit_id
     WHERE visit_packages.user_id = ?
 `, userID).Scan(&results).Error
-
-	fmt.Println(results)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			// Handle case when no records are found for the user
