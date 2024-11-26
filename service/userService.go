@@ -44,7 +44,7 @@ func GetUserByEmail(email string) (*models.User, error) {
 }
 
 // CreateUser creates a new user in the database
-func CreateUser(user models.User) error {
+func CreateUser(user *models.User) error {
 	// Create the user in the database
 	if err := dbConnection.DB.Create(&user).Error; err != nil {
 		return fmt.Errorf("error creating user: %w", err)

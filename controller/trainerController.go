@@ -30,16 +30,25 @@ func (h *TrainerHandler) AddTrainer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	idUserr, err := HandleRegisterTrainer(addTrainer, c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	trainer := trainer2.Trainer{
 		TrainerName:        addTrainer.TrainerName,
 		TrainerDescription: addTrainer.TrainerDescription,
 	}
 	idTrainer, err := h.TrainerService.AddTrainer(&trainer)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create class"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create trainer"})
 		return
 	}
-	HandleRegisterTrainer(idTrainer, addTrainer, c)
+	err = UpdateUserTrainer(idUserr, idTrainer, c)
+	if err != nil {
+		return
+	}
 
 	utils.SendSuccessResponse(c, "add trainer succesfull", trainer)
 }

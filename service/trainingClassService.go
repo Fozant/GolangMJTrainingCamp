@@ -41,6 +41,7 @@ type ClassServiceInterface interface {
 	BookClass(classDetail *models.TrainingClassDetail) error
 	AlreadyBooked(userID, trainingClassID uint) (bool, error)
 	CountParticipant(trainingClassID uint) (uint, error)
+	GetTrainerSchedule(id uint) ([]GetClassResponse, error)
 }
 type ClassService struct{}
 
@@ -230,4 +231,56 @@ func (s *ClassService) CountParticipant(trainingClassID uint) (uint, error) {
 		return 0, err
 	}
 	return total, nil
+}
+
+func (s *ClassService) GetTrainerSchedule(id uint) ([]GetClassResponse, error) {
+	var responses []GetClassResponse
+	var classes []models.TrainingClass
+	err := dbConnection.DB.Where("trainer_id = ?", id).Find(&classes).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve schedule for trainer ID %d: %w", id, err)
+	}
+
+	for _, class := range classes {
+		var trainer trainer.Trainer
+		if err := dbConnection.DB.Where("id =?", class.TrainerID).First(&trainer).Error; err != nil {
+			return nil, fmt.Errorf("failed to retrieve trainer for class ID %d: %w", class.IDTrainingClass, err)
+		}
+		var members []models.TrainingClassDetail
+		if err := dbConnection.DB.Where("training_class_id=?", class.IDTrainingClass).Find(&members).Error; err != nil {
+			return nil, fmt.Errorf("failed to retrieve members for class ID %d: %w", class.IDTrainingClass, err)
+		}
+		var classMembers []ClassMember
+		if len(members) > 0 {
+			for _, member := range members {
+				var user users.User
+				if err := dbConnection.DB.Where("id_user=?", member.UserID).First(&user).Error; err != nil {
+					return nil, fmt.Errorf("failed to retrieve user details for member ID %d: %w", member.UserID, err)
+				}
+				classMembers = append(classMembers, ClassMember{
+					IDUser:  user.IDUser,
+					Name:    user.Name,
+					Email:   user.Email,
+					PNumber: user.PNumber,
+				})
+			}
+		} else {
+			// If no members, initialize with an empty slice (optional but good practice)
+			classMembers = []ClassMember{}
+		}
+		responses = append(responses, GetClassResponse{
+			IDClass:          class.IDTrainingClass,
+			ClassDate:        class.ClassDateTime,
+			ClassCapacity:    class.ClassCapacity,
+			ClassRequirement: class.ClassRequirement,
+			ClassName:        class.ClassName,
+			TrainerDetail: TrainerDetail{
+				IDTrainer:          trainer.ID,
+				TrainerName:        trainer.TrainerName,
+				TrainerDescription: trainer.TrainerDescription},
+			ClassMembers: classMembers,
+		})
+	}
+
+	return responses, nil
 }

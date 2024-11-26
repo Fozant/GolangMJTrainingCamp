@@ -213,3 +213,21 @@ func (h *ClassHandler) verifyMembership(userID uint, classDate time.Time) (bool,
 
 	return false, nil
 }
+func (h *ClassHandler) GetTrainerSchedule(c *gin.Context) {
+	idTrainerStr := c.DefaultQuery("id", "")
+	idTrainer, err := strconv.ParseUint(idTrainerStr, 10, 32)
+	if err != nil {
+		utils.SendErrorResponse(c, http.StatusInternalServerError, "invalid id")
+		return
+	}
+	idTrainerUint := uint(idTrainer)
+
+	schedule, err := h.ClassService.GetTrainerSchedule(idTrainerUint)
+	if err != nil {
+		utils.SendErrorResponse(c, http.StatusInternalServerError, "Failed to get trainer schedule")
+		return
+	}
+
+	utils.SendSuccessResponse(c, "trainer schedule found", schedule)
+
+}
