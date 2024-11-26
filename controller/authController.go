@@ -5,6 +5,7 @@ import (
 	models "GoMJTrainingCamp/dbs/models/users"
 	"GoMJTrainingCamp/service"
 	"GoMJTrainingCamp/utils"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -96,10 +97,10 @@ func HandleRegisterTrainer(addTrainer AddTrainerRequest, c *gin.Context) (uint, 
 		utils.SendErrorResponse(c, http.StatusBadRequest, fmt.Sprintf("Invalid payload: %v", errors))
 		return 0, err
 	}
-	_, err := service.GetUserByEmail(addTrainer.Email)
-	if err == nil {
-		utils.SendErrorResponse(c, http.StatusBadRequest, fmt.Sprintf("User with email %s already exists", addTrainer.Email))
-		return 0, err
+	userr, err := service.GetUserByEmail(addTrainer.Email)
+	if err == nil && userr != nil {
+		utils.SendErrorResponse(c, http.StatusBadRequest, fmt.Sprintf("Trainer with email %s already exists", addTrainer.Email))
+		return 0, errors.New("trainer with email already exists")
 	}
 	hashedPassword, err := service.HashPassword(addTrainer.Password)
 	if err != nil {
@@ -130,8 +131,8 @@ func HandleRegisterTrainer(addTrainer AddTrainerRequest, c *gin.Context) (uint, 
 		gin.H{
 			"token": token,
 		})
-
-	return user.IDUser, nil
+	fmt.Println(err)
+	return user.IDUser, err
 }
 
 func UpdateUserTrainer(idUser uint, idTrainer uint, c *gin.Context) error {

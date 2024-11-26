@@ -31,11 +31,10 @@ func ValidateUserCredentials(email, password string) (*models.User, error) {
 // GetUserByEmail retrieves a user by email
 func GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
-
 	// Query the user by email
 	if err := dbConnection.DB.Where("email = ?", email).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("user with email %s not found", email)
+			return nil, nil
 		}
 		return nil, fmt.Errorf("error querying user: %w", err)
 	}
