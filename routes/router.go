@@ -80,4 +80,5 @@ func packageRoutes(r *gin.Engine, handler *packageListController.PackageHandler)
 	packageGroup := r.Group("/api/package")
 	packageGroup.Use(service.WithJWTAuth)
 	packageGroup.POST("/add", handler.AddPackage)
+	packageGroup.GET("/get", handler.GetPackage)
 }

@@ -6,10 +6,8 @@ import (
 )
 
 type PackageServiceInterface interface {
-	//BuyMembership(membership *models.Membership) (uint, error)
-	//UpdateTransactionID(membershipID uint, transactionID uint) error
-	//GetMembershipByUser(userID uint) ([]MembershipWithTransaction, error)
 	CreatePackage(packages *models.PackageList) error
+	GetPackage(id string) ([]models.PackageList, error)
 }
 type PackageService struct {
 }
@@ -25,4 +23,21 @@ func (service *PackageService) CreatePackage(packages *models.PackageList) error
 		return result.Error
 	}
 	return nil
+}
+func (service *PackageService) GetPackage(id string) ([]models.PackageList, error) {
+	var packages []models.PackageList
+
+	if id != "" {
+		err := dbConnection.DB.Where("id_package = ?", id).Find(&packages).Error
+		if err != nil {
+			return nil, err
+		}
+		return packages, nil
+	}
+
+	err := dbConnection.DB.Find(&packages).Error
+	if err != nil {
+		return nil, err
+	}
+	return packages, nil
 }

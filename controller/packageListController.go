@@ -47,5 +47,15 @@ func (h *PackageHandler) AddPackage(c *gin.Context) {
 	}
 
 	utils.SendSuccessResponse(c, "Sucessfuly created package", nil)
+}
 
+func (h *PackageHandler) GetPackage(c *gin.Context) {
+	id := c.DefaultQuery("id", "")
+
+	packages, err := h.PackageService.GetPackage(id)
+	if err != nil {
+		utils.SendErrorResponse(c, http.StatusNotFound, "Failed to retrieve packages")
+		return
+	}
+	utils.SendSuccessResponse(c, "Successfully retrieved packages", packages)
 }
