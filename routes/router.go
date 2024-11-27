@@ -3,6 +3,7 @@ package routes
 import (
 	authController "GoMJTrainingCamp/controller"
 	membershipController "GoMJTrainingCamp/controller"
+	packageListController "GoMJTrainingCamp/controller"
 	trainerController "GoMJTrainingCamp/controller"
 	trainingClassController "GoMJTrainingCamp/controller"
 	transactionController "GoMJTrainingCamp/controller"
@@ -13,7 +14,8 @@ import (
 
 func SetupRoutes(r *gin.Engine, classHandler *trainingClassController.ClassHandler,
 	trainerHandler *trainerController.TrainerHandler, membershipHandler *membershipController.MembershipHandler,
-	visitHandler *visitPackageController.VisitHandler, transactionHandler *transactionController.TransactionHandler) {
+	visitHandler *visitPackageController.VisitHandler, transactionHandler *transactionController.TransactionHandler,
+	packageHandler *packageListController.PackageHandler) {
 
 	// Public routes for login and registration
 	authRoutes(r)
@@ -24,6 +26,8 @@ func SetupRoutes(r *gin.Engine, classHandler *trainingClassController.ClassHandl
 	membershipRoutes(r, membershipHandler)
 	visitRoutes(r, visitHandler)
 	transactionRoutes(r, transactionHandler)
+	packageRoutes(r, packageHandler)
+
 }
 
 func authRoutes(r *gin.Engine) {
@@ -71,4 +75,9 @@ func visitRoutes(r *gin.Engine, handler *visitPackageController.VisitHandler) {
 	visitGroup := r.Group("/api/visit")
 	visitGroup.Use(service.WithJWTAuth) // JWT middleware for these routes
 	visitGroup.POST("/buy", handler.BuyVisit)
+}
+func packageRoutes(r *gin.Engine, handler *packageListController.PackageHandler) {
+	packageGroup := r.Group("/api/package")
+	packageGroup.Use(service.WithJWTAuth)
+	packageGroup.POST("/add", handler.AddPackage)
 }

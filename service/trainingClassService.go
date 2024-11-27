@@ -255,6 +255,7 @@ func (s *ClassService) GetTrainerSchedule(id uint) ([]GetClassResponse, error) {
 			for _, member := range members {
 				var user users.User
 				if err := dbConnection.DB.Where("id_user=?", member.UserID).First(&user).Error; err != nil {
+
 					return nil, fmt.Errorf("failed to retrieve user details for member ID %d: %w", member.UserID, err)
 				}
 				classMembers = append(classMembers, ClassMember{
@@ -265,7 +266,6 @@ func (s *ClassService) GetTrainerSchedule(id uint) ([]GetClassResponse, error) {
 				})
 			}
 		} else {
-			// If no members, initialize with an empty slice (optional but good practice)
 			classMembers = []ClassMember{}
 		}
 		responses = append(responses, GetClassResponse{

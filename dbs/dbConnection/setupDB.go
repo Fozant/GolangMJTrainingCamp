@@ -18,5 +18,6 @@ func ConnectDatabase() error {
 
 	// Set the global DB variable
 	DB = database
+
 	return nil
 }

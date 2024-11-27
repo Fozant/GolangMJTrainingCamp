@@ -221,7 +221,6 @@ func (h *ClassHandler) GetTrainerSchedule(c *gin.Context) {
 		return
 	}
 	idTrainerUint := uint(idTrainer)
-
 	schedule, err := h.ClassService.GetTrainerSchedule(idTrainerUint)
 	if err != nil {
 		utils.SendErrorResponse(c, http.StatusInternalServerError, "Failed to get trainer schedule")

@@ -26,7 +26,7 @@ func main() {
 		fmt.Println("✅ Database Connection Successful!")
 	}
 
-	if err := dbConnection.DB.AutoMigrate(&users.User{}, &models.TrainingClass{}, trainer.Trainer{}, &models.Transaction{}, &models.Membership{}, &models.VisitPackage{}); err != nil {
+	if err := dbConnection.DB.AutoMigrate(&users.User{}, &models.TrainingClass{}, trainer.Trainer{}, &models.Transaction{}, &models.Membership{}, &models.VisitPackage{}, &models.PackageList{}); err != nil {
 		fmt.Printf("failed to migrate database: %v\n", err)
 		return
 	}
@@ -36,9 +36,9 @@ func main() {
 		return
 	}
 
-	classHandler, trainerHandler, membershipHandler, visitHandler, transactionHandler := initHandler()
+	classHandler, trainerHandler, membershipHandler, visitHandler, transactionHandler, packageHandler := initHandler()
 	r := gin.Default()
-	routes.SetupRoutes(r, classHandler, trainerHandler, membershipHandler, visitHandler, transactionHandler)
+	routes.SetupRoutes(r, classHandler, trainerHandler, membershipHandler, visitHandler, transactionHandler, packageHandler)
 
 	// Run the server and display server details
 	port := ":8080"
@@ -67,6 +67,7 @@ func initHandler() (
 	*controller.MembershipHandler,
 	*controller.VisitHandler,
 	*controller.TransactionHandler,
+	*controller.PackageHandler,
 ) {
 	// Initialize the services
 	classService := service.NewClassService()
@@ -74,6 +75,7 @@ func initHandler() (
 	membershipService := service.NewMembershipService()
 	transactionService := service.NewTransactionService()
 	visitPackageService := service.NewVisitService()
+	packageService := service.NewPackageService()
 
 	// Initialize the handlers with the corresponding services
 	classHandler := controller.NewClassHandler(classService, membershipService, visitPackageService)
@@ -81,7 +83,8 @@ func initHandler() (
 	membershipHandler := controller.NewMembershipHandler(membershipService, transactionService)
 	visitHandler := controller.NewVisitHandler(visitPackageService, transactionService)
 	transactionHandler := controller.NewTransactionHandler(transactionService)
+	packageHandler := controller.NewPackageHandler(packageService)
 
 	// Return the handlers to be used in the main function
-	return classHandler, trainerHandler, membershipHandler, visitHandler, transactionHandler
+	return classHandler, trainerHandler, membershipHandler, visitHandler, transactionHandler, packageHandler
 }

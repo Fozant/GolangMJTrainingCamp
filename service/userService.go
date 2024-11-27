@@ -28,7 +28,6 @@ func ValidateUserCredentials(email, password string) (*models.User, error) {
 	return &user, nil
 }
 
-// GetUserByEmail retrieves a user by email
 func GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
 	// Query the user by email
