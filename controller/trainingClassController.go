@@ -25,6 +25,11 @@ type BookClassRequest struct {
 	IDUser  uint   `json:"idUser,omitempty"`
 	Type    string `json:"type" binding:"required"`
 }
+type EligibilityResponse struct {
+	ValidMember   bool `json:"validMember"`
+	ValidVisit    bool `json:"validVisit"`
+	AlreadyBooked bool `json:"alreadyBooked"`
+}
 
 type ClassHandler struct {
 	ClassService      service.ClassServiceInterface
@@ -229,4 +234,63 @@ func (h *ClassHandler) GetTrainerSchedule(c *gin.Context) {
 
 	utils.SendSuccessResponse(c, "trainer schedule found", schedule)
 
+}
+func (h *ClassHandler) CheckEligibility(c *gin.Context) {
+	response := EligibilityResponse{
+		ValidMember:   true,
+		ValidVisit:    true,
+		AlreadyBooked: false,
+	}
+
+	iduserstr := c.DefaultQuery("iduser", "")
+	iduser, err := strconv.ParseUint(iduserstr, 10, 32)
+	if err != nil {
+		log.Printf("Invalid user ID: %v", err)
+		utils.SendErrorResponse(c, http.StatusBadRequest, "Invalid user ID")
+		return
+	}
+	iduserUint := uint(iduser)
+
+	idclass := c.DefaultQuery("idclass", "")
+	classes, err := h.ClassService.GetClasses(idclass, "")
+	if err != nil || len(classes) == 0 {
+		log.Printf("Failed to retrieve classes: %v", err)
+		utils.SendErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve classes")
+		return
+	}
+
+	// Step 4: Check if the user has already booked the class
+	alreadyBooked, err := h.ClassService.AlreadyBooked(iduserUint, classes[0].IDClass)
+	if err != nil {
+		utils.SendErrorResponse(c, http.StatusInternalServerError, "Error checking booking status")
+		return
+	}
+	if alreadyBooked {
+		fmt.Println(alreadyBooked)
+		response.AlreadyBooked = true
+	}
+
+	hasMember, err := h.verifyMembership(iduserUint, classes[0].ClassDate)
+	if err != nil {
+		response.ValidMember = false
+	}
+	if !hasMember {
+		response.ValidMember = false
+	}
+
+	visits, err := h.VisitService.GetVisitByUser(iduserUint)
+	if err != nil {
+		response.ValidVisit = false
+
+	}
+
+	response.ValidVisit = false
+	for _, visit := range visits {
+		if visit.VisitNumber > visit.VisitUsed && visit.PaymentStatus == "VERIFIED" {
+			response.ValidVisit = true
+			break
+		}
+	}
+
+	utils.SendSuccessResponse(c, "Eligibility check completed", response)
 }
