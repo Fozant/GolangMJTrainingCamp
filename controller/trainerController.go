@@ -53,6 +53,17 @@ func (h *TrainerHandler) AddTrainer(c *gin.Context) {
 	utils.SendSuccessResponse(c, "add trainer succesfull", trainer)
 }
 
+func (h *TrainerHandler) GetAllTrainer(c *gin.Context) {
+
+	result, err := h.TrainerService.GetTrainer()
+	if err != nil {
+		utils.SendErrorResponse(c, http.StatusNotFound, "fialed to retrive trainer")
+		return
+	}
+
+	utils.SendSuccessResponse(c, "add trainer succesfull", result)
+}
+
 //
 //func AddTrainer(c *gin.Context) {
 //	var addTrainer AddTrainerRequest

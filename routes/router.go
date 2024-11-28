@@ -17,10 +17,7 @@ func SetupRoutes(r *gin.Engine, classHandler *trainingClassController.ClassHandl
 	visitHandler *visitPackageController.VisitHandler, transactionHandler *transactionController.TransactionHandler,
 	packageHandler *packageListController.PackageHandler) {
 
-	// Public routes for login and registration
 	authRoutes(r)
-
-	// Protected routes with JWT authentication
 	classRoutes(r, classHandler)
 	trainerRoutes(r, trainerHandler)
 	membershipRoutes(r, membershipHandler)
@@ -31,7 +28,6 @@ func SetupRoutes(r *gin.Engine, classHandler *trainingClassController.ClassHandl
 }
 
 func authRoutes(r *gin.Engine) {
-	// Public authentication routes
 	r.GET("/api/login", authController.HandleLogin)
 	r.POST("/api/register", authController.HandleRegister)
 }
@@ -48,32 +44,31 @@ func classRoutes(r *gin.Engine, handler *trainingClassController.ClassHandler) {
 }
 
 func trainerRoutes(r *gin.Engine, handler *trainerController.TrainerHandler) {
-	// Protected trainer routes with JWT authentication
+
 	trainerGroup := r.Group("/api/trainer")
-	trainerGroup.Use(service.WithJWTAuth) // JWT middleware for these routes
+	trainerGroup.Use(service.WithJWTAuth)
 	trainerGroup.POST("/add", handler.AddTrainer)
+	trainerGroup.GET("/get", handler.GetAllTrainer)
 }
 
 func transactionRoutes(r *gin.Engine, handler *transactionController.TransactionHandler) {
-	// Protected transaction routes with JWT authentication
+
 	transactionGroup := r.Group("/api/transaction")
-	transactionGroup.Use(service.WithJWTAuth) // JWT middleware for these routes
+	transactionGroup.Use(service.WithJWTAuth)
 	transactionGroup.POST("/verify", handler.VerifyTransaction)
 	transactionGroup.GET("/get", handler.GetTransaction)
 	transactionGroup.GET("/getbyuser", handler.GetTransactionByUser)
 }
 
 func membershipRoutes(r *gin.Engine, handler *membershipController.MembershipHandler) {
-	// Protected membership routes with JWT authentication
 	membershipGroup := r.Group("/api/membership")
-	membershipGroup.Use(service.WithJWTAuth) // JWT middleware for these routes
+	membershipGroup.Use(service.WithJWTAuth)
 	membershipGroup.POST("/buy", handler.BuyMembership)
 }
 
 func visitRoutes(r *gin.Engine, handler *visitPackageController.VisitHandler) {
-	// Protected visit routes with JWT authentication
 	visitGroup := r.Group("/api/visit")
-	visitGroup.Use(service.WithJWTAuth) // JWT middleware for these routes
+	visitGroup.Use(service.WithJWTAuth)
 	visitGroup.POST("/buy", handler.BuyVisit)
 }
 func packageRoutes(r *gin.Engine, handler *packageListController.PackageHandler) {

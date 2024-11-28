@@ -9,6 +9,7 @@ import (
 
 type TrainerServiceInterface interface {
 	AddTrainer(trainer *trainer2.Trainer) (idTrainer uint, err error)
+	GetTrainer() ([]trainer2.Trainer, error)
 }
 type TrainerService struct {
 }
@@ -24,4 +25,16 @@ func (s *TrainerService) AddTrainer(trainer *trainer2.Trainer) (idTrainer uint, 
 	}
 
 	return trainer.ID, nil
+}
+
+func (s *TrainerService) GetTrainer() ([]trainer2.Trainer, error) {
+	var trainers []trainer2.Trainer
+
+	result := dbConnection.DB.Find(&trainers)
+	if result.Error != nil {
+		log.Printf("Error getting trainers: %v", result.Error)
+		return nil, result.Error
+	}
+
+	return trainers, nil
 }
