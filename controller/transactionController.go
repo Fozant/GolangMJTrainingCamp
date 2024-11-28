@@ -5,6 +5,7 @@ import (
 	"GoMJTrainingCamp/service"
 	"GoMJTrainingCamp/utils"
 	"github.com/gin-gonic/gin"
+
 	"net/http"
 	"strconv"
 )

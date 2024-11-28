@@ -22,6 +22,7 @@ type MembershipServiceInterface interface {
 	BuyMembership(membership *models.Membership) (uint, error)
 	UpdateTransactionID(membershipID uint, transactionID uint) error
 	GetMembershipByUser(userID uint) ([]MembershipWithTransaction, error)
+	GetMembershipByUserNoTrans(userID uint) ([]models.Membership, error)
 }
 type MembershipService struct {
 }
@@ -54,6 +55,35 @@ func (s *MembershipService) GetMembershipByUser(userID uint) ([]MembershipWithTr
     SELECT memberships.*, transactions.*
     FROM memberships
     LEFT JOIN transactions ON memberships.id_membership = transactions.membership_id
+    WHERE memberships.user_id = ?
+`, userID).Scan(&results).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			// Handle case when no records are found for the user
+			return nil, fmt.Errorf("no memberships found for user with ID %d: %w", userID, err)
+		}
+
+		// Handle other types of errors such as database connection issues
+		return nil, fmt.Errorf("error querying memberships for user with ID %d: %w", userID, err)
+	}
+
+	// If no results are found, handle gracefully
+	if len(results) == 0 {
+		return nil, fmt.Errorf("no memberships found for user with ID %d", userID)
+	}
+
+	// Return the results
+	return results, nil
+}
+
+func (s *MembershipService) GetMembershipByUserNoTrans(userID uint) ([]models.Membership, error) {
+	var results []models.Membership
+
+	err := dbConnection.DB.Raw(`
+    SELECT memberships.*
+    FROM memberships
+
     WHERE memberships.user_id = ?
 `, userID).Scan(&results).Error
 

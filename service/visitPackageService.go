@@ -20,6 +20,7 @@ type VisitServiceInterface interface {
 	BuyVisit(visit *models.VisitPackage) (uint, error)
 	GetVisitByUser(userID uint) ([]VisitWithTransaction, error)
 	UseVisit(userID uint, idVisit uint) error
+	GetVisitByUserNoTransaction(userID uint) ([]models.VisitPackage, error)
 }
 type VisitService struct {
 }
@@ -69,6 +70,32 @@ func (s *VisitService) GetVisitByUser(userID uint) ([]VisitWithTransaction, erro
 	return results, nil
 }
 
+func (s *VisitService) GetVisitByUserNoTransaction(userID uint) ([]models.VisitPackage, error) {
+	var results []models.VisitPackage
+
+	err := dbConnection.DB.Raw(`
+    SELECT visit_packages.*
+    FROM visit_packages 
+    WHERE visit_packages.user_id = ?
+`, userID).Scan(&results).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			// Handle case when no records are found for the user
+			return nil, fmt.Errorf("no visit found for user with ID %d: %w", userID, err)
+		}
+
+		// Handle other types of errors such as database connection issues
+		return nil, fmt.Errorf("error querying visit for user with ID %d: %w", userID, err)
+	}
+
+	// If no results are found, handle gracefully
+	if len(results) == 0 {
+		return nil, fmt.Errorf("no visit found for user with ID %d", userID)
+	}
+
+	// Return the results
+	return results, nil
+}
 func (s *VisitService) UseVisit(userID uint, idVisit uint) error {
 
 	var visit models.VisitPackage

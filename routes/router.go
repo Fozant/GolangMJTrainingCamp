@@ -42,6 +42,7 @@ func classRoutes(r *gin.Engine, handler *trainingClassController.ClassHandler) {
 	classGroup.POST("/book", handler.BookClass)
 	classGroup.GET("/trainerschedule", handler.GetTrainerSchedule)
 	classGroup.GET("/check-eligibility", handler.CheckEligibility)
+	classGroup.GET("/getallmembershipandvisit", handler.GetAllMembershipAndVisit)
 }
 
 func trainerRoutes(r *gin.Engine, handler *trainerController.TrainerHandler) {

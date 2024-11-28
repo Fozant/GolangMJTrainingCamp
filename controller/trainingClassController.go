@@ -30,6 +30,10 @@ type EligibilityResponse struct {
 	ValidVisit    bool `json:"validVisit"`
 	AlreadyBooked bool `json:"alreadyBooked"`
 }
+type GetMemberVisitResponse struct {
+	Memberships  []models.Membership   `json:"memberships"`
+	VisitDetails []models.VisitPackage `json:"visitDetails"`
+}
 
 type ClassHandler struct {
 	ClassService      service.ClassServiceInterface
@@ -293,4 +297,34 @@ func (h *ClassHandler) CheckEligibility(c *gin.Context) {
 	}
 
 	utils.SendSuccessResponse(c, "Eligibility check completed", response)
+}
+
+func (h *ClassHandler) GetAllMembershipAndVisit(c *gin.Context) {
+
+	iduserstr := c.DefaultQuery("id", "")
+	iduser, err := strconv.ParseUint(iduserstr, 10, 32)
+	if err != nil {
+		log.Printf("Invalid user ID: %v", err)
+		utils.SendErrorResponse(c, http.StatusBadRequest, "Invalid user ID")
+		return
+	}
+	iduserUint := uint(iduser)
+
+	membership, err := h.MembershipService.GetMembershipByUserNoTrans(iduserUint)
+	if err != nil {
+		utils.SendErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve membership")
+		return
+	}
+	visitpackage, err := h.VisitService.GetVisitByUserNoTransaction(iduserUint)
+	if err != nil {
+		utils.SendErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve visitpackage")
+		return
+	}
+	// Populate the response struct
+	response := GetMemberVisitResponse{
+		Memberships:  membership,
+		VisitDetails: visitpackage,
+	}
+	utils.SendSuccessResponse(c, "All membership and visit found", response)
+
 }
